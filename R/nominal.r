@@ -164,3 +164,5 @@ for(i in 1 : (p-1)*k)
 }
 
 dim(Betaout)
+
+ess(Betaout)  #effective sample size
