@@ -1,3 +1,10 @@
 useDynLib(BayesMVProbit, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
 
+import(MASS)
+import(tmg)
+import(mvtnorm)
+import(markovchain)
+import(coda)
+import(mcmcse)
+import(truncnorm)
