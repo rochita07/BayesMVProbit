@@ -80,3 +80,6 @@ for(i in 1 : n)
 
 dim(x)
 
+precision = solve( diag(rep(1, (p-1) * n )) + (x %*% t(x)) * lam ) #var-cov matrix
+dim(precision)
+
