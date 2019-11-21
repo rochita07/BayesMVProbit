@@ -116,3 +116,15 @@ for(i in 1:n)
   }
   
 }
+
+g = rep(0.001, row_no)
+r = rep(0, row_no)
+z = matrix(0, nrow = iter, ncol = row_no) # initialization
+
+#HH posteriors of z
+for(i in 2:iter)
+{
+  z[i, ] = rtmg(1, M = precision, f = f, g = g, r = r, initial = z[(i-1), ])
+}  
+
+dim(z)
