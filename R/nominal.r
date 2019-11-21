@@ -128,3 +128,20 @@ for(i in 2:iter)
 }  
 
 dim(z)
+
+## Posterior of beta
+
+Q = t(x) %*% x  + diag(rep(1, (p-1) * k)) * (1/lam)
+L = chol(Q) #cholesky decomposition
+
+beta = matrix(0, nrow = iter, ncol = (p-1) * k)
+
+for(i in 1 : iter)
+{
+  b = t(x) %*% z[i,]
+  z1 = rmvnorm(1, rep(0, (p-1) * k), diag(rep(1, (p-1) * k)))
+  y = solve(L) %*% t(z1)
+  v = solve(t(L)) %*% b
+  theta = solve(L) %*% v
+  beta[i, ] = y + theta
+}
