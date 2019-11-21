@@ -83,3 +83,36 @@ dim(x)
 precision = solve( diag(rep(1, (p-1) * n )) + (x %*% t(x)) * lam ) #var-cov matrix
 dim(precision)
 
+## for each subject, there would be  p-1 x p-1 matrix of constraints in f
+row_no = col_no = (p - 1) * n
+
+f = matrix(rep(0, row_no * col_no ), nrow = row_no, ncol = col_no)  ## matrix of constrains
+dim(f)
+
+a = matrix(rep(0, (p-1) * (p-1)), nrow = p-1)  # when d[i] != 0
+
+for(i in 1:n)
+{
+  
+  if(d[i] == 0)
+  {
+    for(l in 1: (p-1))
+    {
+      f[ (p-1) * (i-1) + l,  (p -1)* (i-1) + l]  = -1
+    }
+  }
+  
+  if(d[i] != 0)
+  { c = 0
+  for(l in 1 : (p-1))
+  {
+    
+    a[l, l] = ifelse(d[i] == l, 1, -1)
+    f[ (p-1) * (i-1) + l,  (p -1)* (i-1) + l]  =  ifelse(d[i] == l, 1, -1)
+  }
+  
+  w = which(diag(a) == 1)
+  f[ c( ((p -1)* (i-1) + 1) : ((p -1)* (i-1) + (p-1))), (p -1)* (i-1) + w] = rep(1, p-1)
+  }
+  
+}
