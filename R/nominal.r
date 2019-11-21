@@ -68,3 +68,15 @@ for(i in 1:n){
 }
 y
 d
+
+lam = 2  ## parameter in prior distn of beta
+
+x = matrix(rep(0, (p-1) * n * (p-1) * k ), nrow = (p-1) * n, ncol = (p-1) * k)  ## to store the kronecker product
+
+for(i in 1 : n)
+{
+  x[ c( ((p-1) * (i-1) + 1) : ((p-1) * (i-1) + (p-1)) ) , ] = kronecker(diag(p-1), t(a_mat[, i] ))
+}
+
+dim(x)
+
