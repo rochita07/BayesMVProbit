@@ -145,3 +145,22 @@ for(i in 1 : iter)
   theta = solve(L) %*% v
   beta[i, ] = y + theta
 }
+
+Betaout = beta[-c(1:burn), ]
+postmean_beta = colMeans(Betaout)
+beta_act
+beta_act_vec = as.vector(t(beta_act))
+beta_act_vec
+
+pmean_HH = postmean_beta
+rbind(pmean_HH,beta_act_vec)
+
+##Plotting the posterior betas
+par(mfrow = c(3,4))
+
+for(i in 1 : (p-1)*k)
+{
+  traceplot(as.mcmc(Betaout[,i]))
+}
+
+dim(Betaout)
