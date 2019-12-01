@@ -204,6 +204,8 @@ for(i in 1 : beta_dim)
   coda::traceplot(as.mcmc(Betaout[,i]))
 }
 
+#effective sample size
+mcmcse::ess(Betaout)  
 
 
 
