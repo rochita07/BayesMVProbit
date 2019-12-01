@@ -174,7 +174,7 @@ for(i in 2:iter)
 }  
 
 # sample from Posterior of beta
-Q = t(x) %*% solve(z_given_beta_var) %*% x  +  solve(prior_beta_var)  ## variance of marginal z|y(or d)
+Q = t(x) %*% solve(z_given_beta_var) %*% x  +  solve(prior_beta_var)  ## variance of posterior of beta
 dim(Q)
 L = chol(Q) # Cholesky decomposition
 
@@ -194,6 +194,15 @@ for(i in 1 : iter)
 Betaout = beta[-c(1:burn), ]
 postmean_beta = colMeans(Betaout)
 rbind(pmean_HH,beta_act_vec) # comparison with actual given betas
+
+# plotting of trace plots
+
+par(mfrow = c(3,4))
+
+for(i in 1 : beta_dim)
+{
+  coda::traceplot(as.mcmc(Betaout[,i]))
+}
 
 
 
