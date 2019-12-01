@@ -166,11 +166,28 @@ r = rep(0, row_no)
 z = matrix(0, nrow = iter, ncol = row_no) # initialization
 dim(z)
 
-#HH posteriors of z
+# sample from HH posteriors of z
 
 for(i in 2:iter)
 {
   z[i, ] = rtmg(1, M = precision, f = f, g = g, r = r, initial = z[(i-1), ])
 }  
 
+# sample from Posterior of beta
+Q = t(x) %*% solve(z_given_beta_var) %*% x  +  solve(prior_beta_var)  ## variance of marginal z|y(or d)
+dim(Q)
+L = chol(Q) # Cholesky decomposition
+
+beta = matrix(0, nrow = iter, ncol = beta_dim)  # initialization
+dim(beta)
+
+for(i in 1 : iter)
+{
+  b = t(x) %*% z[i,]
+  z1 = rmvnorm(1, rep(0, beta_dim), diag(beta_dim) )
+  y = solve(L) %*% t(z1)
+  v = solve(t(L)) %*% b
+  theta = solve(L) %*% v
+  beta[i, ] = y + theta
+}
 
