@@ -8,7 +8,7 @@ k = 4 # no of covariates
 iter = 5000 # no of iterartion
 burn = 1000 # no of burn in
 z_dim = sum(p) - length(p)  # dimension of z for each subject
-beta_dim = z_dim * k  # order of beta matrix
+beta_dim = z_dim * k  # order of beta matrix  = length of beta_vec (after vectorization)
 ## beta is a matrix of order z_dim x k
 
 #GEneration of beta matrix and vectorization
@@ -79,7 +79,7 @@ d
 ## For each subject, Xi is a mtrix of  nrow = z_dim = sum(p) - length(p), ncol = z_dim * beta_dim
 ## Xi s are stacked columnwise
 
-x = matrix(rep(0, z_dim * n * length(beta_act_vec)), nrow = z_dim * n, ncol = length(beta_act_vec) )
+x = matrix(rep(0, z_dim * n * beta_dim), nrow = z_dim * n, ncol = beta_dim )
 dim(x)
 
 s = 0  # Initialization, to consider the counts of row
@@ -98,3 +98,14 @@ x[1:10,]
 dim(x)
 x_mat[,1]
 x_mat[, 2]
+
+
+## Prior distribution of beta and distribution of z (as vector) specification:
+
+prior_beta_mean = rep(0, beta_dim)  # prior mean of beta
+prior_beta_var = diag(beta_dim)  #  prior variance of beta
+dim(prior_beta_var)
+z_given_beta_var = kronecker(diag(n), sig_gen)  #'Sigma' = variance of z (as vector of length z_dim *n)
+dim(z_given_beta_var)
+
+
