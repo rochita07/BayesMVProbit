@@ -1,6 +1,7 @@
 ## Multivariate Nomianal Measure, Sigma matrix is known, Holmes Held method, and xi's are subject specific
 #(there may be the case of outcome- subject specific)
 
+library(tmg)
 ##Generation of  data 
 n = 50 # no of subjects
 p = c(3,4) # no of levels
@@ -159,3 +160,17 @@ for(i in 1:n)
 
 f[1:10, 1:10]
 d[,1:2]
+
+g = rep(0.001, row_no) 
+r = rep(0, row_no)
+z = matrix(0, nrow = iter, ncol = row_no) # initialization
+dim(z)
+
+#HH posteriors of z
+
+for(i in 2:iter)
+{
+  z[i, ] = rtmg(1, M = precision, f = f, g = g, r = r, initial = z[(i-1), ])
+}  
+
+
