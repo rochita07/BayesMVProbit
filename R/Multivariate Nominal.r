@@ -191,3 +191,12 @@ for(i in 1 : iter)
   beta[i, ] = y + theta
 }
 
+Betaout = beta[-c(1:burn), ]
+postmean_beta = colMeans(Betaout)
+rbind(pmean_HH,beta_act_vec) # comparison with actual given betas
+
+
+
+
+
+
