@@ -8,12 +8,17 @@ k = 4 # no of covariates
 iter = 5000 # no of iterartion
 burn = 1000 # no of burn in
 z_dim = sum(p) - length(p)  # dimension of z for each subject
-beta_dim = z_dim * k  # length of beta
+beta_dim = z_dim * k  # order of beta matrix
 ## beta is a matrix of order z_dim x k
 
+#GEneration of beta matrix and vectorization
 set.seed(1287)
 beta_act = matrix(rep(2, beta_dim), nrow = z_dim)
-beta_act
+#Vectorization of beta
+beta_act_vec = as.vector(t(beta_act)) # Transpose is considered to vectorize row wise
+length(beta_act_vec)
+
+#Generation of X matrix
 x_mat = matrix(rnorm(n * k), nrow = k ) # each column is for each subject, each row is for each  covariates
 dim(x_mat)
 
@@ -69,3 +74,10 @@ for(i in 1: n)
 }
 d
 
+
+# Creation of X metrix 
+## For each subject, Xi is a mtrix of  nrow = z_dim = sum(p) - length(p), ncol = z_dim * beta_dim
+## Xi s are stacked columnwise
+
+x = matrix(rep(0, z_dim * n * length(beta_act_vec)), nrow = z_dim * n, ncol = length(beta_act_vec) )
+dim(x)
