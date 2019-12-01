@@ -81,3 +81,20 @@ d
 
 x = matrix(rep(0, z_dim * n * length(beta_act_vec)), nrow = z_dim * n, ncol = length(beta_act_vec) )
 dim(x)
+
+s = 0  # Initialization, to consider the counts of row
+
+for(i in 1 : n)
+{
+  ## only for 1st variable in zi
+  
+  x[ (s + 1) : (s + z_dim) ,]  = kronecker(diag(z_dim), t(x_mat[, i]) )
+  s = s + z_dim
+}
+
+
+x[1:5,]
+x[1:10,]
+dim(x)
+x_mat[,1]
+x_mat[, 2]
