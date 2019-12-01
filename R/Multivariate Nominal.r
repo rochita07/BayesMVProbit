@@ -76,7 +76,7 @@ for(i in 1: n)
 d
 
 
-# Creation of X metrix 
+# Creation of X matrix 
 ## For each subject, Xi is a mtrix of  nrow = z_dim = sum(p) - length(p), ncol = z_dim * beta_dim
 ## Xi s are stacked columnwise
 
@@ -87,18 +87,10 @@ s = 0  # Initialization, to consider the counts of row
 
 for(i in 1 : n)
 {
-  ## only for 1st variable in zi
   
   x[ (s + 1) : (s + z_dim) ,]  = kronecker(diag(z_dim), t(x_mat[, i]) )
   s = s + z_dim
 }
-
-
-x[1:5,]
-x[1:10,]
-dim(x)
-x_mat[,1]
-x_mat[, 2]
 
 
 ## Prior distribution of beta and distribution of z (as vector) specification:
@@ -152,14 +144,9 @@ for(i in 1:n)
     }
     
     s = s + p[j] - 1
-    #print(s)
   }
   
-  
 }
-
-f[1:10, 1:10]
-d[,1:2]
 
 g = rep(0.001, row_no) 
 r = rep(0, row_no)
