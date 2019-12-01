@@ -108,4 +108,9 @@ dim(prior_beta_var)
 z_given_beta_var = kronecker(diag(n), sig_gen)  #'Sigma' = variance of z (as vector of length z_dim *n)
 dim(z_given_beta_var)
 
+## posterior of Z
 
+z_mean = prior_beta_mean   ## marginal 
+z_var = z_given_beta_var + x %*% prior_beta_var %*% t(x)  ## marginal
+dim(z_var)
+precision = solve(z_var)
