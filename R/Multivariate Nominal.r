@@ -18,3 +18,11 @@ x_mat = matrix(rnorm(n * k), nrow = k ) # each column is for each subject, each 
 z_mat = beta_act %*% x_mat
 dim(x_mat)
 dim(z_mat)
+
+# A specific choice of sigma matrix (mentioned in the example of paper)
+sig1 = matrix(c(1, 0.36, 0.36, 0.81), nrow = 2)
+sig2 = matrix(c(1, 0.45, 0.24, 0.45, 0.81, 0.41, 0.24, 0.41, 0.9), nrow =3)
+sig3 = matrix(c(rep(0.2, 6)), nrow =2)
+sig4 = matrix(c(rep(0.2, 6)), nrow =3)
+sig_gen = as.matrix(rbind(cbind(sig1, sig3), cbind(sig4, sig2)))
+sig_gen  ## Final sigma matrix for e
