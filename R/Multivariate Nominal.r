@@ -114,3 +114,48 @@ z_mean = prior_beta_mean   ## marginal
 z_var = z_given_beta_var + x %*% prior_beta_var %*% t(x)  ## marginal
 dim(z_var)
 precision = solve(z_var)
+
+## Creating matrix of constraints 'f'
+## for each subject, there would be  z_dim x z_dim matrix of constraints in f
+row_no = col_no = z_dim * n
+
+f = matrix(rep(0, row_no * col_no ), nrow = row_no, ncol = col_no )
+dim(f)
+s = 0   # Initialization, to consider the counts of row
+
+
+for(i in 1:n)
+{
+  
+  for(j in 1:length(p))
+  {
+    
+    if(d[j, i] == 0)
+    {
+      for(l in 1: (p[j]-1))
+      {
+        f[ s + l,  s + l]  = -1
+      }
+    }
+    
+    if(d[j, i] != 0)
+    {
+      a = matrix(rep(0, (p[j] -1) * (p[j] -1)), nrow = p[j] -1)  # when d[i] != 0
+      for(l in 1 : (p[j]-1))
+      {
+        a[l, l] = ifelse(d[j,i] == l, 1, -1)
+        f[ s + l,  s + l]  =  ifelse(d[j, i] == l, 1, -1)
+      }
+      w = which(diag(a) == 1)
+      f[ c( (s + 1) : (s + (p[j]-1))), s + w] = rep(1, p[j]-1)
+    }
+    
+    s = s + p[j] - 1
+    #print(s)
+  }
+  
+  
+}
+
+f[1:10, 1:10]
+d[,1:2]
