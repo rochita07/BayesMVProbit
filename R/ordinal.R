@@ -192,3 +192,8 @@ for(i in 1: n)
 # beta_update_var = solve(prior_beta_var + tcrossprod(x))
 beta_update_mean = beta_update_var %*% (solve(prior_beta_var) %*% prior_beta_mean  + x %*% z_update)
 beta_update = mvtnorm::rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_update_var )
+
+## initialization for next iteration 
+beta = as.vector(beta_update)
+delta = delta_current
+beta_mat[l, ] = beta
