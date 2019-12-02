@@ -201,3 +201,8 @@ delta = delta_current
 beta_mat[l, ] = beta
 }
 beta_mat[iter,]
+
+# posterior mean of beta
+Betaout = beta_mat[-c(1:burn), ]
+postmean_beta = colMeans(Betaout)
+rbind(postmean_beta,beta_act) # comparison with actual given betas
