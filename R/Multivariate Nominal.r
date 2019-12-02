@@ -171,16 +171,17 @@ dim(beta)
 for(i in 1 : iter)
 {
   b = t(x) %*% z[i,]
-  z1 = rmvnorm(1, rep(0, beta_dim), diag(beta_dim) )
-  y = solve(L) %*% t(z1)
+  z1 = MASS::mvrnorm(1, rep(0, beta_dim), diag(beta_dim) )
+  y = solve(L) %*% z1
   v = solve(t(L)) %*% b
   theta = solve(L) %*% v
   beta[i, ] = y + theta
 }
 
 Betaout = beta[-c(1:burn), ]
-postmean_beta = colMeans(Betaout)
-rbind(pmean_HH,beta_act_vec) # comparison with actual given betas
+postmean_beta_HH = colMeans(Betaout)
+beta_HH = matrix(postmean_beta_HH, byrow = TRUE, nrow = z_dim) ## (output) should be printed rowwise
+rbind(postmean_beta_HH,beta_act_vec) # comparison with actual given betas
 
 # plotting of trace plots
 
@@ -188,13 +189,11 @@ par(mfrow = c(3,4))
 
 for(i in 1 : beta_dim)
 {
-  coda::traceplot(as.mcmc(Betaout[,i]))
+  coda::traceplot(coda::as.mcmc(Betaout[,i]))
 }
 
 #effective sample size
 mcmcse::ess(Betaout)  
-
-
 
 
 
