@@ -166,3 +166,23 @@ if(u > prob_MH)
   delta_current = delta_current
 }
 
+## Updates of z
+cutoff_update = c(-Inf, 0, cumsum(exp(delta_current)), Inf)  ## update on nu 
+z_update = rep(0, n) ## initialization
+# lower_z = rep(0, n) ## initialization
+# upper_z = rep(0, n) ## initialization
+
+
+for(i in 1: n)
+{
+  for(j in 1: cat)
+  {
+    if(y[i] == j) # j = 1, 2, 3, ..., cat
+    {
+      lower_z = cutoff_update[j] 
+      upper_z = cutoff_update[j + 1] 
+      z_update[i] = truncnorm::rtruncnorm(n = 1, a = lower_z, b = upper_z, mean = t(x[,i]) %*% beta, sd = sig)
+      
+    }
+  }
+}
