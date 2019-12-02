@@ -206,3 +206,12 @@ beta_mat[iter,]
 Betaout = beta_mat[-c(1:burn), ]
 postmean_beta = colMeans(Betaout)
 rbind(postmean_beta,beta_act) # comparison with actual given betas
+
+# plotting of trace plots
+
+par(mfrow = c(3,4))
+
+for(i in 1 : length(Betaout))
+{
+  coda::traceplot(coda::as.mcmc(Betaout[,i]))
+}
