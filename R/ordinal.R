@@ -46,7 +46,9 @@ delta_current = mvtnorm::rmvnorm(n = 1, mean = prior_delta_mean , sigma = prior_
 beta_update_var = solve(prior_beta_var + tcrossprod(x))
 beta_mat = matrix(rep(0, k * iter), nrow = iter)
 
-
+for (l in 1: iter)
+{
+  
 ## updates of delta
 
 f = 1 ## initialization
@@ -197,3 +199,5 @@ beta_update = mvtnorm::rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_upda
 beta = as.vector(beta_update)
 delta = delta_current
 beta_mat[l, ] = beta
+}
+beta_mat[iter,]
