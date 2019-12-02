@@ -45,3 +45,39 @@ beta = as.vector(beta)
 delta_current = mvtnorm::rmvnorm(n = 1, mean = prior_delta_mean , sigma = prior_delta_var )
 beta_update_var = solve(prior_beta_var + tcrossprod(x))
 beta_mat = matrix(rep(0, k * iter), nrow = iter)
+
+
+# calculation of likelihood                        
+for(i in 1: n)
+{
+  if(y[i] == 1)
+  {
+    a = (-t(x[,i]) %*% beta) / sig
+    b = -Inf
+    f = f * ( pnorm(a) - pnorm(b))   # pnorm(-inf) = 0 and nu1 = 0
+  }
+  
+  if(y[i] == 2)
+  {
+    a = ( exp(delta[1]) - (t(x[,i]) %*% beta) )/ sig
+    b = (-t(x[,i]) %*% beta) / sig
+    f = f * ( pnorm( a )  - pnorm(b) )
+  }
+  
+  for( j in 3 : (cat-1))
+  {
+    if(y[i] == j)
+    {
+      a = (sum(exp(delta[1:(j-1)])) -  (t(x[,i]) %*% beta) ) / sig
+      b = (sum(exp(delta[1:(j-2)])) -  (t(x[,i]) %*% beta) ) / sig
+      f = f * ( pnorm(a)  - pnorm(b) )
+    }
+  }
+  if(y[i] == cat)
+  {
+    a = Inf
+    b = (sum(exp(delta)) - (t(x[,i]) %*% beta) ) / sig
+    f = f * ( pnorm( a )  - pnorm(b) )
+  }
+  
+}
