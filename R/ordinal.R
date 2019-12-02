@@ -35,3 +35,13 @@ prior_delta_mean = rep(0, nu)
 prior_delta_var = diag(nu)
 prior_beta_mean = rep(0, k)
 prior_beta_var = diag(k)
+
+## initializations required for the iteration loop
+
+# beta = beta_act ## if not given to draw sample from prior !!!! Check
+
+beta = mvtnorm::rmvnorm(n = 1, mean = prior_beta_mean , sigma = prior_beta_var)
+beta = as.vector(beta)
+delta_current = mvtnorm::rmvnorm(n = 1, mean = prior_delta_mean , sigma = prior_delta_var )
+beta_update_var = solve(prior_beta_var + tcrossprod(x))
+beta_mat = matrix(rep(0, k * iter), nrow = iter)
