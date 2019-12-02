@@ -186,3 +186,9 @@ for(i in 1: n)
     }
   }
 }
+
+## Updates of beta
+
+# beta_update_var = solve(prior_beta_var + tcrossprod(x))
+beta_update_mean = beta_update_var %*% (solve(prior_beta_var) %*% prior_beta_mean  + x %*% z_update)
+beta_update = mvtnorm::rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_update_var )
