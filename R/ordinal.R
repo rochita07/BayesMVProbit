@@ -28,3 +28,10 @@ for(i in 1:n)
 y
 z
 table(y)
+
+## Prior and likelihood specifications 
+sig = 1 ## error variance
+prior_delta_mean = rep(0, nu)
+prior_delta_var = diag(nu)
+prior_beta_mean = rep(0, k)
+prior_beta_var = diag(k)
