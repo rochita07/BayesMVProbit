@@ -8,3 +8,5 @@ import(markovchain)
 import(coda)
 import(mcmcse)
 import(truncnorm)
+
+import(numDeriv)
