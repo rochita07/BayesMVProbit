@@ -10,3 +10,4 @@ import(mcmcse)
 import(truncnorm)
 
 import(numDeriv)
+import(condMVNorm)
