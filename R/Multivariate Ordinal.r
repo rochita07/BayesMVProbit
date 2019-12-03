@@ -277,3 +277,24 @@ for(l in 1:q)
     } # for loop j : 1,..,cat[l]
   } # for loop i : 1,..,n
   
+  
+  ## Updates of beta
+  
+  # beta_update_var = solve(prior_beta_var + tcrossprod(x))
+  
+  sum_t_x_sig_z = matrix(rep(0, beta_dim), nrow = beta_dim) ## initialization
+  for(i in 1: n)
+  {
+    sum_t_x_sig_z = sum_t_x_sig_z  + t(x[[i]]) %*% solve(sig) %*% z[,i] 
+  }
+  sum_t_x_sig_z 
+  
+  beta_update_mean = beta_update_var %*% (solve(prior_beta_var) %*% prior_beta_mean  + sum_t_x_sig_z)
+  beta_update = rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_update_var )
+  
+  ## initialization for next iteration 
+  beta = as.vector(beta_update)
+  #delta = delta_current_list
+  beta_mat[k, ] = beta
+  #print(beta)
+  
