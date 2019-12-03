@@ -90,3 +90,16 @@ prior_delta_var = list(prior_delta_var1, prior_delta_var2, prior_delta_var3)
 
 prior_beta_mean = rep(0, beta_dim)
 prior_beta_var = diag(beta_dim)
+
+## initializations required for the iteration loop
+
+beta = rmvnorm(n = 1, mean = prior_beta_mean , sigma = prior_beta_var)
+beta = as.vector(beta)
+
+delta_current_list = cutoff  ## just to initialize as list of q to store q delta vectors 
+
+for(l in 1:q)
+{
+  delta_current_list[[l]] = rmvnorm(n = 1, mean = prior_delta_mean[[l]] , sigma = prior_delta_var[[l]] )
+}
+delta_current_list
