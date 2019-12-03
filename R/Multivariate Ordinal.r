@@ -112,3 +112,15 @@ z_update = z ## initialization
 
 # To calculate conditional mean and variance for z[l,i]
 given.ind = 1: q
+
+
+# Calculation of variance of posterior of beta
+
+t_x_sig_x = lapply(x, function(x) t(x) %*% solve(sig) %*% x)
+sum_t_x_sig_x = matrix(rep(0, beta_dim^2), nrow = beta_dim) ## initialization
+for(i in 1: n)
+{
+  sum_t_x_sig_x = sum_t_x_sig_x + t_x_sig_x[[i]]
+}
+sum_t_x_sig_x 
+beta_update_var = solve(solve(prior_beta_var) + sum_t_x_sig_x )  # variance of posterior of beta
