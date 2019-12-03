@@ -305,3 +305,12 @@ for (k in 1: iter) # for iteration
   #print(beta)
   
 } 
+
+beta_mat[1:20,]
+beta_mat[iter,]
+
+## calculation of posterior mean 
+
+Betaout = beta_mat[-c(1:burn), ]
+postmean_beta = colMeans(Betaout)
+rbind(postmean_beta,beta_act) # comparison with actual given betas
