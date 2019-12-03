@@ -124,3 +124,135 @@ for(i in 1: n)
 }
 sum_t_x_sig_x 
 beta_update_var = solve(solve(prior_beta_var) + sum_t_x_sig_x )  # variance of posterior of beta
+
+
+
+## updates of delta
+
+#   
+for(l in 1:q)
+{
+  ## for a fixed l
+  y_given_beta_delta_optim = function(delta)
+  {
+    
+    prior_delta = dmvnorm(delta, prior_delta_mean[[l]], prior_delta_var[[l]] )  # prior density for delta
+    
+    # calculation of likelihood     
+    f = 1 ## initialization
+    
+    for(i in 1: n)
+    {
+      if(y[l, i] == 1)
+      {
+        a = (-x[[i]][l,] %*% beta) / diag(sig)[l]
+        # b = -Inf
+        f = f *  pnorm(a)   # pnorm(-inf) = 0 and nu1 = 0
+      }
+      
+      if(y[l, i] == 2)
+      {
+        a = ( exp(delta[1]) - (x[[i]][l,] %*% beta) )/ diag(sig)[l]
+        b = (-x[[i]][l,] %*% beta) / diag(sig)[l]
+        f = f * ( pnorm(a)  - pnorm(b) )
+      }
+      
+      for( j in 3 : (cat[l]-1))
+      {
+        if(y[l, i] == j )
+        {
+          a = (sum(exp(delta[1:(j-1)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+          b = (sum(exp(delta[1:(j-2)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+          f = f * ( pnorm(a)  - pnorm(b) )
+        }
+      }
+      if(y[l, i] == cat[l])
+      {
+        #a = Inf
+        b = (sum(exp(delta)) - (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+        f = f * ( 1  - pnorm(b) )
+      }
+      
+    }
+    optim_fn = - (f * prior_delta)  # to minimize in optim fn (-ve) is considered
+    return(optim_fn)
+    
+  }
+  
+  ## updates of delta
+  
+  
+  delta_hat = optim(par = rep(0, nu[l]), fn =  y_given_beta_delta_optim)$par
+  # optimum value of delta to be used in proposed t distn as parameter
+  
+  y_given_beta_delta_hessian = function(delta)
+  {
+    prior_delta = dmvnorm(delta, prior_delta_mean[[l]], prior_delta_var[[l]] )  # prior density for delta
+    
+    # calculation of likelihood     
+    f = 1 ## initialization
+    
+    for(i in 1: n)
+    {
+      if(y[l, i] == 1)
+      {
+        a = (-x[[i]][l,] %*% beta) / diag(sig)[l]
+        # b = -Inf
+        f = f *  pnorm(a)   # pnorm(-inf) = 0 and nu1 = 0
+      }
+      
+      if(y[l, i] == 2)
+      {
+        a = ( exp(delta[1]) - (x[[i]][l,] %*% beta) )/ diag(sig)[l]
+        b = (-x[[i]][l,] %*% beta) / diag(sig)[l]
+        f = f * ( pnorm(a)  - pnorm(b) )
+      }
+      
+      for( j in 3 : (cat[l]-1))
+      {
+        if(y[l, i] == j )
+        {
+          a = (sum(exp(delta[1:(j-1)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+          b = (sum(exp(delta[1:(j-2)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+          f = f * ( pnorm(a)  - pnorm(b) )
+        }
+      }
+      if(y[l, i] == cat[l])
+      {
+        #a = Inf
+        b = (sum(exp(delta)) - (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+        f = f * ( 1  - pnorm(b) )
+      }
+      
+    }
+    
+    hessian_fn = log(f * prior_delta)
+    return(hessian_fn)
+  }
+  
+  hessian_mat = hessian(func = y_given_beta_delta_hessian , x = delta_hat)
+  D_hat = solve(-hessian_mat)
+  D_hat  # var- cov matrix , to be converted into scale matrix
+  
+  scale_t =  D_hat * ((df_t[l]-2) / df_t[l])  # scale matrix for poposal t distn
+  scale_t
+  # delta_current = mvtnorm::rmvt(n = 1, delta = delta_hat , sigma = scale_t, df = df_t)  
+  delta_proposed = rmvt(n = 1, delta = delta_hat , sigma = scale_t, df = df_t[l])
+  density_delta_current = dmvt(delta_current_list[[l]], delta = delta_hat , sigma = scale_t, df = df_t[l], log = FALSE )
+  density_delta_proposed = dmvt(delta_proposed, delta = delta_hat , sigma = scale_t, df = df_t[l], log = FALSE )
+  prob_MH_1st_part = y_given_beta_delta_optim(delta_proposed) / y_given_beta_delta_optim(delta_current_list[[l]])
+  prob_MH_2nd_part = density_delta_current / density_delta_proposed
+  prob_MH = min(1, prob_MH_1st_part * prob_MH_2nd_part)
+  prob_MH = ifelse(is.nan(prob_MH) == TRUE, 1, prob_MH)
+  
+  u = runif(1,0,1)  # to draw an independent sample 
+  
+  if(u <= prob_MH)
+  {
+    delta_current_list[[l]] = delta_proposed
+  }
+  if(u > prob_MH)
+  {
+    delta_current_list[[l]] = delta_current_list[[l]]
+  }
+  
