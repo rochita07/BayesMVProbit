@@ -52,3 +52,26 @@ for(i in 1:n)
   z[,i] =  x[[i]] %*% beta_act + e[, i]
 }
 z
+
+## Generation of Y 
+
+cutoff1 = c(-Inf, nu_cutoff1, Inf)
+cutoff2 = c(-Inf, nu_cutoff2, Inf)
+cutoff3 = c(-Inf, nu_cutoff3, Inf)
+cutoff = list(cutoff1, cutoff2, cutoff3)
+
+y = matrix(rep(0, q * n), nrow = q) ## initialization of matrix of order q x n # each column is for each subject
+
+
+for(i in 1:n)
+{
+  for(l in 1:q)
+  {
+    for(j in 1: length(cutoff[[l]]))
+    {
+      if(z[l, i] > cutoff[[l]][j] && z[l, i] <= cutoff[[l]][j + 1]) # making one side inclusive
+        y[l, i] = j
+    }
+  }
+}
+y
