@@ -256,3 +256,24 @@ for(l in 1:q)
     delta_current_list[[l]] = delta_current_list[[l]]
   }
   
+  
+  ## Updates of z
+  cutoff_update[[l]] = c(-Inf, 0, cumsum(exp(delta_current_list[[l]])), Inf)  ## update on nu 
+  
+  for(i in 1: n)
+  {
+    for(j in 1: cat[l])
+    {
+      if(y[l, i] == j) # j = 1, 2, 3, ..., cat
+      {
+        lower_z = cutoff_update[[l]][j] 
+        upper_z = cutoff_update[[l]][j + 1] 
+        
+        cond = condMVN(mean = x[[i]] %*% beta, sigma = sig, dep=l, given = given.ind[-l], X.given = rep(1, (q-1)), check.sigma=FALSE )
+        
+        z_update[l,i] = rtruncnorm(n = 1, a = lower_z, b = upper_z, mean = cond$condMean, sd = sqrt(cond$condVar))
+        
+      }
+    } # for loop j : 1,..,cat[l]
+  } # for loop i : 1,..,n
+  
