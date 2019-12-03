@@ -103,3 +103,12 @@ for(l in 1:q)
   delta_current_list[[l]] = rmvnorm(n = 1, mean = prior_delta_mean[[l]] , sigma = prior_delta_var[[l]] )
 }
 delta_current_list
+
+beta_mat = matrix(rep(0, beta_dim * iter), nrow = iter)
+
+cutoff_update = cutoff  # initialization as list
+z_update = z ## initialization
+
+
+# To calculate conditional mean and variance for z[l,i]
+given.ind = 1: q
