@@ -75,3 +75,18 @@ for(i in 1:n)
   }
 }
 y
+
+## Prior and likelihood specifications ## null values otherwise specified
+
+prior_delta_mean1 = rep(0, nu[1])
+prior_delta_mean2 = rep(0, nu[2])
+prior_delta_mean3 = rep(0, nu[3])
+prior_delta_mean = list(prior_delta_mean1, prior_delta_mean2, prior_delta_mean3)
+
+prior_delta_var1 = diag(nu[1])
+prior_delta_var2 = diag(nu[2])
+prior_delta_var3 = diag(nu[3])
+prior_delta_var = list(prior_delta_var1, prior_delta_var2, prior_delta_var3)
+
+prior_beta_mean = rep(0, beta_dim)
+prior_beta_var = diag(beta_dim)
