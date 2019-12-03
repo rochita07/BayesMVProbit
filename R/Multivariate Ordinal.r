@@ -323,3 +323,6 @@ for(i in 1 : length(Betaout))
 {
   traceplot(as.mcmc(Betaout[,i]))
 }
+
+#effective sample size
+ess(Betaout)  
