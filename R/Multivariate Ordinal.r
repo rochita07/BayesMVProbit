@@ -38,3 +38,17 @@ for(i in 1:n)
   x[[i]] = a
 }
 x
+
+# generation of error 
+sig = diag(q) ## error covariance matrix of order q x q ( to be mentioned in the input)
+
+e = rmvnorm(n = n, mean = rep(0, q) , sigma = sig)
+e = t(e) # # each column is for each subject
+
+# Generation of  Z
+z = matrix(rep(0, q * n), nrow = q)  # matrix of order q x n # # each column is for each subject
+for(i in 1:n)
+{
+  z[,i] =  x[[i]] %*% beta_act + e[, i]
+}
+z
