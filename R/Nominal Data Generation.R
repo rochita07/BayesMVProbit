@@ -124,5 +124,5 @@ prior_beta_var = NULL
 
 
 
-ordinal_post_beta(category = c(3,4), iter = 10, burn = 2, cred_level = 0.95, x_list, sig, d,
+nominal_post_beta(category = c(3,4), iter = 10, burn = 2, cred_level = 0.95, x_list, sig, d,
                   prior_beta_mean = NULL, prior_beta_var = NULL)

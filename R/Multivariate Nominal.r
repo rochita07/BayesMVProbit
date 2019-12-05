@@ -8,7 +8,7 @@ library(coda)
 library(mcmcse)
 library(truncnorm)
 
-ordinal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, sig, d,
+nominal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, sig, d,
                              prior_beta_mean = NULL, prior_beta_var = NULL)
 {
   
