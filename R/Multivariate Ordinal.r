@@ -9,7 +9,7 @@ library(mcmcse)
 library(markovchain)
 library(matrixcalc)
 library(graphics)
-
+library(mcmcplots)
 
 
 ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.95, x_list, sig, y,
@@ -222,7 +222,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
   beta_post_var = solve(solve(prior_beta_var) + sum_t_x_sig_x )  # variance of posterior of beta
   
   #check
-  if(min(eigen(beta_post_var)$values)<0)
+  if(min(eigen(beta_post_var)[["values"]])<0)
   {
     stop(" variance matrix for posterior beta is not positive semi definite")
   }
@@ -482,7 +482,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
   interval = apply(Betaout, 2, function(x) quantile(x, c((alpha/2), 1-(alpha/2))) )
   
   #effective sample size
-  sample_size = ess(Betaout) 
+  #sample_size = ess(Betaout)
   
   par_mfrow = floor(sqrt(beta_dim)) + 1  # square root for next square no of beta_dim. used in par(mfrow) to plot
   x11()
@@ -503,16 +503,15 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
   }
   
   x11()
-  par(mfrow = c(1,1))
+  
   # caterplot
+  
   par(mfrow = c(1,1))
-  carter = for(i in 1 : ncol(Betaout))
-  {
-    caterplot(as.mcmc(Betaout), labels.loc ="axis")
-  }
+  
+  caterplot(as.mcmc(Betaout), labels.loc ="axis")
+  
   
   return(list(Posterior_mean = postmean_beta , Credible_interval = interval , var = beta_post_var, effective_sample_size = sample_size, trace_plot = trace, density_plot = density, carter_plot = carter))
   
 }  # end of fn ordinal_post_beta
-
 
