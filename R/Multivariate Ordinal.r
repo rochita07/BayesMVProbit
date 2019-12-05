@@ -1,15 +1,3 @@
-library(mvtnorm)
-library(numDeriv)
-library(truncnorm)
-library(condMVNorm)
-library(ggplot2)
-library(ggpubr)
-library(coda)
-library(mcmcse)
-library(markovchain)
-library(matrixcalc)
-library(graphics)
-library(mcmcplots)
 
 
 ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.95, x_list, sig, y,
