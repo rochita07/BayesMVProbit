@@ -298,6 +298,6 @@ nominal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, si
   
   caterplot(as.mcmc(Betaout), labels.loc ="axis")
   
-  return(list(Posterior_mean = postmean_beta , Credible_interval = interval , effective_sample_size = sample_size, trace_plot = trace, density_plot = density, carter_plot = carter))
+  return(list(Posterior_mean = postmean_beta , Credible_interval = interval , trace_plot = trace, density_plot = density, carter_plot = carter))
   
 } # end of function nominal_post_beta
