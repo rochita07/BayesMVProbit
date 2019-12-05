@@ -216,7 +216,7 @@ nominal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, si
   #HH posteriors of z
   for(i in 2:iter)
   {
-    z[i, ] = tmg::rtmg(1, M = precision, f = f, g = g, r = r, initial = z[(i-1), ])
+    z[i, ] = tmg::rtmg(n = 1, M = precision, f = f, g = g, r = r, initial = z[(i-1), ])
   }  
   
   dim(z)

@@ -14,4 +14,3 @@ import(graphics)
 import(mcmcplots)
 export(nominal_post_beta)
 export(ordinal_post_beta)
-  
