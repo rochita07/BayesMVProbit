@@ -53,7 +53,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
     check_n[i] = dim_x_list[[i]][2]
   }
   
-  if(identical(check_n, rep(n, variable_dim))==FALSE)
+  if(identical(check_n, rep(n, variable_dim)) == FALSE)
   {
     stop("Each level in x_list should have columns eqaul to given no of subjects !")
   }
@@ -89,14 +89,14 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
   if(cred_level<0 || cred_level>1){stop("credible interval level should be in [0,1]")}
   
   
-  #check
-  if(dim(y)[1] != variable_dim)
-  {stop("# row of y matrix should be equal to given variable_dim")
-  }
-  
-  if(dim(y)[2] != n)
-  {stop("# col of y matrix should be equal to given n" )
-  }
+  # #check
+  # if(dim(y)[1] != variable_dim)
+  # {stop("# row of y matrix should be equal to given variable_dim")
+  #   }
+  # 
+  # if(dim(y)[2] != n)
+  # {stop("# col of y matrix should be equal to given n" )
+  #   }
   
   
   #check
@@ -513,5 +513,5 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
   
   return(list(Posterior_mean = postmean_beta , Credible_interval = interval , var = beta_post_var, effective_sample_size = sample_size, trace_plot = trace, density_plot = density, carter_plot = carter))
   
-}  # end of fn ordinal_post_beta
+}  # end of function ordinal_post_beta
 
