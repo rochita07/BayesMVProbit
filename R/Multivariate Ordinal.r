@@ -221,6 +221,12 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
   sum_t_x_sig_x 
   beta_post_var = solve(solve(prior_beta_var) + sum_t_x_sig_x )  # variance of posterior of beta
   
+  #check
+  if(min(eigen(beta_post_var)$values)<0)
+  {
+    stop(" variance matrix for posterior beta is not positive semi definite")
+  }
+  
   delta_hat_proposed_t = list(0) #initialization to store ncp parameter of proposed t density
   scale_proposed_t = list(0)  #initialization to store scale matrix of proposed t density
   
@@ -241,7 +247,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
       y_given_beta_delta_optim = function(delta)
       {
         
-        prior_delta = dmvnorm(delta, prior_delta_mean[[l]], prior_delta_var[[l]] )  # prior density for delta
+        prior_delta = dmvnorm(delta, mean = prior_delta_mean[[l]], sigma = prior_delta_var[[l]] )  # prior density for delta
         
         # calculation of likelihood     
         f = 1 ## initialization
@@ -291,7 +297,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
       
       ## updates of delta
       
-      delta_hat = optim(par = rep(0, nu[l]), fn =  y_given_beta_delta_optim, method = "BFGS")$par
+      delta_hat = optim(par = rep(0, nu[l]), fn =  y_given_beta_delta_optim, method = "BFGS")[["par"]]
       delta_hat_proposed_t[[l]] = delta_hat
       
       # optimum value of delta to be used in proposed t distn as parameter
@@ -299,7 +305,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
       
       y_given_beta_delta_hessian = function(delta)
       {
-        prior_delta = dmvnorm(delta, prior_delta_mean[[l]], prior_delta_var[[l]] )  # prior density for delta
+        prior_delta = dmvnorm(delta, mean = prior_delta_mean[[l]], sigma = prior_delta_var[[l]] )  # prior density for delta
         
         # calculation of likelihood     
         f = 1 ## initialization
@@ -399,9 +405,9 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
             lower_z = cutoff_update[[l]][j] 
             upper_z = cutoff_update[[l]][j + 1] 
             
-            cond = condMVN(mean = x[[i]] %*% beta, sigma = sig, dep=l, given = given.ind[-l], X.given = rep(1, (variable_dim - 1)), check.sigma=FALSE )
+            cond = condMVN(mean = x[[i]] %*% beta, sigma = sig, dep=l, given = given.ind[-l], X.given = rep(1, (variable_dim - 1)), check.sigma = FALSE )
             
-            z_update[l,i] = rtruncnorm(n = 1, a = lower_z, b = upper_z, mean = cond$condMean, sd = sqrt(cond$condVar))
+            z_update[l,i] = rtruncnorm(n = 1, a = lower_z, b = upper_z, mean = cond[["condMean"]], sd = sqrt(cond[["condVar"]]))
             
           }
         } # for loop j : 1,..,category[l]
@@ -505,7 +511,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
     caterplot(as.mcmc(Betaout), labels.loc ="axis")
   }
   
-  return(list(Posterior_mean = postmean_beta , Credible_interval = interval , effective_sample_size = sample_size, trace_plot = trace, density_plot = density, carter_plot = carter))
+  return(list(Posterior_mean = postmean_beta , Credible_interval = interval , var = beta_post_var, effective_sample_size = sample_size, trace_plot = trace, density_plot = density, carter_plot = carter))
   
 }  # end of fn ordinal_post_beta
 
