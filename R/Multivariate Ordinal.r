@@ -1,271 +1,512 @@
+library(mvtnorm)
+library(numDeriv)
+library(truncnorm)
+library(condMVNorm)
+library(ggplot2)
+library(ggpubr)
+library(coda)
+library(mcmcse)
+library(markovchain)
+library(matrixcalc)
+library(graphics)
 
-ordinal_posterior_beta = function()
+
+
+ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.95, x_list, sig, y,
+                             prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
 {
   
-#Generation of Xi matrix as list
-x = lapply(1:n, function(x) matrix(rep(0, q * beta_dim), nrow = q) ) ## initialization
-a = matrix(rep(0, q * beta_dim), nrow = q)
-col_indi = c(0, cumsum(k))  # of length q+1  # index of starting and ending points for column in Xi matrix 
-for(i in 1:n)
-{
-  for(l in 1: q)
+  n = ncol(y) ## no of subjects
+  variable_dim = nrow(y) # no of variables
+  
+  # Check  for numbers of categories for each variable should be  >= 3
+  check_category = category - rep(3, variable_dim ) ## should be >=0
+  check_category = ifelse(check_category < 0 , 1, 0)  # should be all zeros
+  if(identical(check_category, rep(0, variable_dim)) == FALSE)
   {
-    a[l, (col_indi[l] + 1) : col_indi[l + 1]] = t(x_mat[[l]][,i])
+    stop("numbers of categories for each variable should be  >= 3")
   }
-  x[[i]] = a
-}
-x
-
-
-
-## initializations required for the iteration loop
-
-beta = rmvnorm(n = 1, mean = prior_beta_mean , sigma = prior_beta_var)
-beta = as.vector(beta)
-
-delta_current_list = cutoff  ## just to initialize as list of q to store q delta vectors 
-
-for(l in 1:q)
-{
-  delta_current_list[[l]] = rmvnorm(n = 1, mean = prior_delta_mean[[l]] , sigma = prior_delta_var[[l]] )
-}
-delta_current_list
-
-beta_mat = matrix(rep(0, beta_dim * iter), nrow = iter)
-
-cutoff_update = cutoff  # initialization as list
-z_update = z ## initialization
-
-
-# To calculate conditional mean and variance for z[l,i]
-given.ind = 1: q
-
-
-# Calculation of variance of posterior of beta
-
-t_x_sig_x = lapply(x, function(x) t(x) %*% solve(sig) %*% x)
-sum_t_x_sig_x = matrix(rep(0, beta_dim^2), nrow = beta_dim) ## initialization
-for(i in 1: n)
-{
-  sum_t_x_sig_x = sum_t_x_sig_x + t_x_sig_x[[i]]
-}
-sum_t_x_sig_x 
-beta_update_var = solve(solve(prior_beta_var) + sum_t_x_sig_x )  # variance of posterior of beta
-
-
-for (k in 1: iter) # for iteration
-{
   
-  ## updates of delta
+  nu_tot = category + 1 ## no of cut points 
+  nu = nu_tot - 3 ## no of cutpoints to be considered for each variable ( nu0, nu1, nuJ are fixed)
   
-  #   
-  for(l in 1:q)
+  #check whether x_list is given as list
+  if(is.list(x_list) == FALSE){stop("x_list should be given as list")}
+  
+  dim_x_list = lapply(x_list, function(x) dim(x))  # extracting #row from each xi as each col is for each subject
+  covariate_num = rep(0, variable_dim)
+  
+  for(i in 1: variable_dim)
   {
-    ## for a fixed l
-    y_given_beta_delta_optim = function(delta)
+    covariate_num[i] = dim_x_list[[i]][1]
+  }
+  
+  #check whether any element in covariate_num is zero
+  if(min(covariate_num) == 0){stop("For each variable there should be atleast one covariate ")}
+  
+  beta_dim = sum(covariate_num)
+  
+  #check  # check for compatibility of dimension of x_list with n
+  check_n = array(variable_dim)
+  for(i in 1: variable_dim)
+  {
+    check_n[i] = dim_x_list[[i]][2]
+  }
+  
+  if(identical(check_n, rep(n, variable_dim))==FALSE)
+  {
+    stop("Each level in x_list should have columns eqaul to given no of subjects !")
+  }
+  
+  ## Calculation of X list, each list is for each subject
+  
+  x = lapply(1:n, function(x) matrix(rep(0, variable_dim * beta_dim), nrow = variable_dim) ) ## initialization
+  a = matrix(rep(0, variable_dim * beta_dim), nrow = variable_dim) ## to store the value in the loop
+  col_indi = c(0, cumsum(covariate_num))  # of length variable_dim + 1
+  for(i in 1:n)
+  {
+    for(l in 1: variable_dim)
     {
+      a[l, (col_indi[l] + 1) : col_indi[l + 1]] = t(x_list[[l]][,i])
+    }
+    x[[i]] = a
+  }
+  
+  
+  #check 
+  if(is.null(df_t) == TRUE)  # if not supplied
+  {
+    df_t = rep(5 , variable_dim) 
+  }
+  
+  #check
+  if(iter < burn){stop("# iteration should be > # of burn in")}
+  
+  #check
+  if(n < beta_dim ) {stop("n should be greater than dimension of beta")}
+  
+  #check
+  if(cred_level<0 || cred_level>1){stop("credible interval level should be in [0,1]")}
+  
+  
+  #check
+  if(dim(y)[1] != variable_dim)
+  {stop("# row of y matrix should be equal to given variable_dim")
+  }
+  
+  if(dim(y)[2] != n)
+  {stop("# col of y matrix should be equal to given n" )
+  }
+  
+  
+  #check
+  if(is.null(prior_delta_mean) == TRUE)
+  {
+    prior_delta_mean = list()
+    for(i in 1: variable_dim)
+    {
+      prior_delta_mean[[i]] = rep(0, nu[i])
+    }
+  }
+  
+  if(is.null(prior_delta_var) == TRUE)
+  {
+    prior_delta_var = list()
+    for(i in 1: variable_dim)
+    {
+      prior_delta_var[[i]] = diag(nu[i])
+    }
+  }
+  
+  if(is.null(prior_beta_mean) == TRUE)
+  {
+    prior_beta_mean = rep(0, beta_dim)
+  }
+  
+  if(is.null(prior_beta_var) == TRUE)
+  {
+    prior_beta_var = diag(beta_dim)
+  }
+  
+  
+  #check
+  if(is.list(prior_delta_mean) == FALSE){stop("prior_delta_mean should be given as list")}
+  
+  dim_prior_delta_mean = lapply(prior_delta_mean, function(x) length(x))
+  for(i in 1: variable_dim)
+  {
+    if(dim_prior_delta_mean[[i]] != nu[i]) 
+    {stop("For each level, length of delta would be category - 2")
+    }
+  }
+  
+  
+  #check
+  if(is.list(prior_delta_var) == FALSE){stop("prior_delta_mean should be given as list")}
+  
+  dim_prior_delta_var = lapply(prior_delta_var, function(x) dim(x))
+  for(i in 1: variable_dim)
+  {
+    if(dim_prior_delta_var[[i]][1] != dim_prior_delta_var[[i]][1])
+    {
+      stop("Prior variance matrix for each variable should be a square matrix")
+    }
+    if(dim_prior_delta_var[[i]][1] != nu[i])
+    {
+      stop("For each level, dimension of variance matrix would be (category-2) x (category-2) ")
+    }
+  }
+  
+  #check!
+  if(length(prior_beta_mean) != beta_dim)
+  {stop("length of prior mean for beta should be of sum of no of total covariates for each variable")
+  }
+  
+  #check
+  
+  if(is.positive.definite(sig) == FALSE)
+  {stop("Covariance matrix of error should be symmetric positive definite matrix")
+  }
+  
+  #check
+  check_prior_delta_var = lapply(prior_delta_var, function(x) is.positive.definite(x) )
+  
+  for(i in 1: variable_dim)
+  {
+    if(identical(check_prior_delta_var[[i]], TRUE) == FALSE)
+      stop(paste("Prior covariance matrix of delta for", i, "th variable be symmetric positive definite matrix"))
+  }
+  
+  #check
+  if(is.positive.definite(prior_beta_var) == FALSE)
+  {stop("Prior covariance matrix of beta should be symmetric positive definite matrix")
+  }
+  
+  
+  
+  
+  
+  ## initializations required for the iteration loop
+  
+  beta = rmvnorm(n = 1, mean = prior_beta_mean , sigma = prior_beta_var) # as 1st sample of beta
+  beta = as.vector(beta)
+  
+  delta_current_list = list(0)  ##  to initialize as list of variable_dum to store variable_dim delta vectors 
+  
+  for(l in 1: variable_dim)
+  {
+    delta_current_list[[l]] = rmvnorm(n = 1, mean = prior_delta_mean[[l]] , sigma = prior_delta_var[[l]] )
+  }
+  delta_current_list
+  
+  
+  beta_mat = matrix(rep(0, beta_dim * iter), nrow = iter)  # initialization to store the posterior samples of beta, each row is for each iteration
+  dim(beta_mat)
+  
+  cutoff_update = list(0)  # initialization as list
+  z_update = matrix(rep(0, variable_dim * n), nrow = variable_dim) ## initialization
+  
+  # To calculate conditional mean and variance for z[l,i]
+  given.ind = 1: variable_dim
+  
+  
+  # Calculation of variance of posterior of beta
+  
+  #t_x_sig_x = lapply(x, function(x) t(x) %*% solve(sig) %*% x)
+  sum_t_x_sig_x = matrix(rep(0, beta_dim^2), nrow = beta_dim) ## initialization
+  for(i in 1: n)
+  {
+    sum_t_x_sig_x = sum_t_x_sig_x + t(x[[i]]) %*% sig %*% x[[i]]
+  }
+  sum_t_x_sig_x 
+  beta_post_var = solve(solve(prior_beta_var) + sum_t_x_sig_x )  # variance of posterior of beta
+  
+  delta_hat_proposed_t = list(0) #initialization to store ncp parameter of proposed t density
+  scale_proposed_t = list(0)  #initialization to store scale matrix of proposed t density
+  
+  
+  
+  
+  
+  for (k in 1: iter) # for iteration
+  {
+    
+    
+    ## To calculate the parameters of proposal student-t density for each variable
+    
+    for(l in 1:variable_dim)
+    {
+      ## calculation of delta_hat_proposed_t
       
-      prior_delta = dmvnorm(delta, prior_delta_mean[[l]], prior_delta_var[[l]] )  # prior density for delta
-      
-      # calculation of likelihood     
-      f = 1 ## initialization
-      
-      for(i in 1: n)
+      y_given_beta_delta_optim = function(delta)
       {
-        if(y[l, i] == 1)
-        {
-          a = (-x[[i]][l,] %*% beta) / diag(sig)[l]
-          # b = -Inf
-          f = f *  pnorm(a)   # pnorm(-inf) = 0 and nu1 = 0
-        }
         
-        if(y[l, i] == 2)
-        {
-          a = ( exp(delta[1]) - (x[[i]][l,] %*% beta) )/ diag(sig)[l]
-          b = (-x[[i]][l,] %*% beta) / diag(sig)[l]
-          f = f * ( pnorm(a)  - pnorm(b) )
-        }
+        prior_delta = dmvnorm(delta, prior_delta_mean[[l]], prior_delta_var[[l]] )  # prior density for delta
         
-        for( j in 3 : (cat[l]-1))
+        # calculation of likelihood     
+        f = 1 ## initialization
+        
+        for(i in 1: n)
         {
-          if(y[l, i] == j )
+          if(y[l, i] == 1)
           {
-            a = (sum(exp(delta[1:(j-1)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
-            b = (sum(exp(delta[1:(j-2)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+            a = (-x[[i]][l,] %*% beta) / diag(sig)[l]
+            # b = -Inf
+            f = f *  pnorm(a)   # pnorm(-inf) = 0 and nu1 = 0
+          }
+          
+          if(y[l, i] == 2)
+          {
+            a = ( exp(delta[1]) - (x[[i]][l,] %*% beta) )/ diag(sig)[l]
+            b = (-x[[i]][l,] %*% beta) / diag(sig)[l]
             f = f * ( pnorm(a)  - pnorm(b) )
           }
-        }
-        if(y[l, i] == cat[l])
+          
+          if(y[l, i] == category[l])
+          {
+            #a = Inf
+            b = (sum(exp(delta)) - (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+            f = f * ( 1  - pnorm(b) )
+          }
+          
+          if(nu[l] > 1) ## for only category > 3, it should enter this loop
+          {
+            for( j in 3 : (category[l]-1))
+            {
+              if(y[l, i] == j )
+              {
+                a = (sum(exp(delta[1:(j-1)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+                b = (sum(exp(delta[1:(j-2)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+                f = f * ( pnorm(a)  - pnorm(b) )
+              } # if
+            } # for
+          } # if
+          
+        } # end of i 1:n
+        
+        optim_fn = -(f * prior_delta)  # to minimize in optim fn (-ve) is considered
+        return(optim_fn)
+        
+      } # end of function y_given_beta_delta_optim
+      
+      ## updates of delta
+      
+      delta_hat = optim(par = rep(0, nu[l]), fn =  y_given_beta_delta_optim, method = "BFGS")$par
+      delta_hat_proposed_t[[l]] = delta_hat
+      
+      # optimum value of delta to be used in proposed t distn as parameter
+      
+      
+      y_given_beta_delta_hessian = function(delta)
+      {
+        prior_delta = dmvnorm(delta, prior_delta_mean[[l]], prior_delta_var[[l]] )  # prior density for delta
+        
+        # calculation of likelihood     
+        f = 1 ## initialization
+        
+        for(i in 1: n)
         {
-          #a = Inf
-          b = (sum(exp(delta)) - (x[[i]][l,] %*% beta) ) / diag(sig)[l]
-          f = f * ( 1  - pnorm(b) )
+          if(y[l, i] == 1)
+          {
+            a = (-x[[i]][l,] %*% beta) / diag(sig)[l]
+            # b = -Inf
+            f = f *  pnorm(a)   # pnorm(-inf) = 0 and nu1 = 0
+          }
+          
+          if(y[l, i] == 2)
+          {
+            a = ( exp(delta[1]) - (x[[i]][l,] %*% beta) )/ diag(sig)[l]
+            b = (-x[[i]][l,] %*% beta) / diag(sig)[l]
+            f = f * ( pnorm(a)  - pnorm(b) )
+          }
+          
+          if(y[l, i] == category[l])
+          {
+            #a = Inf
+            b = (sum(exp(delta)) - (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+            f = f * ( 1  - pnorm(b) )
+          }
+          
+          if(nu[l] > 1) ## for only category > 3, it should enter this loop
+          {
+            for( j in 3 : (category[l]-1))
+            {
+              if(y[l, i] == j )
+              {
+                a = (sum(exp(delta[1:(j-1)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+                b = (sum(exp(delta[1:(j-2)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
+                f = f * ( pnorm(a)  - pnorm(b) )
+              }
+            }
+          }
+          
         }
         
+        hessian_fn = log(f * prior_delta)
+        return(hessian_fn)
       }
-      optim_fn = - (f * prior_delta)  # to minimize in optim fn (-ve) is considered
-      return(optim_fn)
       
-    }
+      hessian_mat = hessian(func = y_given_beta_delta_hessian , x = delta_hat)
+      D_hat = solve(-hessian_mat)
+      D_hat  # var- cov matrix , to be converted into scale matrix
+      
+      scale_proposed_t[[l]] =  D_hat * ((df_t[l]-2) / df_t[l])  # scale matrix for poposal t distn
+      scale_proposed_t[[l]]
+      
+    } # end of loop for l in 1: variable_dim
+    
+    delta_hat_proposed_t
+    scale_proposed_t
+    
+    
+    
     
     ## updates of delta
     
-    
-    delta_hat = optim(par = rep(0, nu[l]), fn =  y_given_beta_delta_optim)$par
-    # optimum value of delta to be used in proposed t distn as parameter
-    
-    y_given_beta_delta_hessian = function(delta)
+    for(l in 1: variable_dim)
     {
-      prior_delta = dmvnorm(delta, prior_delta_mean[[l]], prior_delta_var[[l]] )  # prior density for delta
+      delta_proposed = rmvt(n = 1, delta = delta_hat_proposed_t[[l]] , sigma = scale_proposed_t[[l]], df = df_t[l])
       
-      # calculation of likelihood     
-      f = 1 ## initialization
+      density_delta_current = dmvt(delta_current_list[[l]], delta = delta_hat_proposed_t[[l]] , sigma = scale_proposed_t[[l]], df = df_t[l], log = FALSE )
+      density_delta_proposed = dmvt(delta_proposed, delta = delta_hat_proposed_t[[l]] , sigma = scale_proposed_t[[l]], df = df_t[l], log = FALSE )
+      
+      prob_MH_1st_part = y_given_beta_delta_optim(delta_proposed) / y_given_beta_delta_optim(delta_current_list[[l]])
+      prob_MH_2nd_part = density_delta_current / density_delta_proposed
+      prob_MH = min(1, prob_MH_1st_part * prob_MH_2nd_part)
+      prob_MH = ifelse(is.nan(prob_MH) == TRUE, 1, prob_MH)
+      
+      u = runif(1,0,1)  # to draw an independent sample 
+      
+      if(u <= prob_MH)
+      {
+        delta_current_list[[l]] = delta_proposed
+      }
+      if(u > prob_MH)
+      {
+        delta_current_list[[l]] = delta_current_list[[l]]
+      }
+      
+      
+      ## Updates of z
+      cutoff_update[[l]] = c(-Inf, 0, cumsum(exp(delta_current_list[[l]])), Inf)  ## update on nu 
       
       for(i in 1: n)
       {
-        if(y[l, i] == 1)
+        for(j in 1: category[l])
         {
-          a = (-x[[i]][l,] %*% beta) / diag(sig)[l]
-          # b = -Inf
-          f = f *  pnorm(a)   # pnorm(-inf) = 0 and nu1 = 0
-        }
-        
-        if(y[l, i] == 2)
-        {
-          a = ( exp(delta[1]) - (x[[i]][l,] %*% beta) )/ diag(sig)[l]
-          b = (-x[[i]][l,] %*% beta) / diag(sig)[l]
-          f = f * ( pnorm(a)  - pnorm(b) )
-        }
-        
-        for( j in 3 : (cat[l]-1))
-        {
-          if(y[l, i] == j )
+          if(y[l, i] == j) # j = 1, 2, 3, ..., category
           {
-            a = (sum(exp(delta[1:(j-1)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
-            b = (sum(exp(delta[1:(j-2)])) -  (x[[i]][l,] %*% beta) ) / diag(sig)[l]
-            f = f * ( pnorm(a)  - pnorm(b) )
+            lower_z = cutoff_update[[l]][j] 
+            upper_z = cutoff_update[[l]][j + 1] 
+            
+            cond = condMVN(mean = x[[i]] %*% beta, sigma = sig, dep=l, given = given.ind[-l], X.given = rep(1, (variable_dim - 1)), check.sigma=FALSE )
+            
+            z_update[l,i] = rtruncnorm(n = 1, a = lower_z, b = upper_z, mean = cond$condMean, sd = sqrt(cond$condVar))
+            
           }
-        }
-        if(y[l, i] == cat[l])
-        {
-          #a = Inf
-          b = (sum(exp(delta)) - (x[[i]][l,] %*% beta) ) / diag(sig)[l]
-          f = f * ( 1  - pnorm(b) )
-        }
-        
-      }
+        } # for loop j : 1,..,category[l]
+      } # for loop i : 1,..,n
       
-      hessian_fn = log(f * prior_delta)
-      return(hessian_fn)
-    }
+    } # end of for(l in 1: variable_dim) loop
     
-    hessian_mat = hessian(func = y_given_beta_delta_hessian , x = delta_hat)
-    D_hat = solve(-hessian_mat)
-    D_hat  # var- cov matrix , to be converted into scale matrix
     
-    scale_t =  D_hat * ((df_t[l]-2) / df_t[l])  # scale matrix for poposal t distn
-    scale_t
-    # delta_current = mvtnorm::rmvt(n = 1, delta = delta_hat , sigma = scale_t, df = df_t)  
-    delta_proposed = rmvt(n = 1, delta = delta_hat , sigma = scale_t, df = df_t[l])
-    density_delta_current = dmvt(delta_current_list[[l]], delta = delta_hat , sigma = scale_t, df = df_t[l], log = FALSE )
-    density_delta_proposed = dmvt(delta_proposed, delta = delta_hat , sigma = scale_t, df = df_t[l], log = FALSE )
-    prob_MH_1st_part = y_given_beta_delta_optim(delta_proposed) / y_given_beta_delta_optim(delta_current_list[[l]])
-    prob_MH_2nd_part = density_delta_current / density_delta_proposed
-    prob_MH = min(1, prob_MH_1st_part * prob_MH_2nd_part)
-    prob_MH = ifelse(is.nan(prob_MH) == TRUE, 1, prob_MH)
+    # updates of y
     
-    u = runif(1,0,1)  # to draw an independent sample 
+    # y = matrix(rep(0, variable_dim * n), nrow = variable_dim) ## initialization of matrix of order variable_dim x n # each column is for each subject
     
-    if(u <= prob_MH)
+    
+    for(i in 1:n)
     {
-      delta_current_list[[l]] = delta_proposed
+      for(l in 1:variable_dim)
+      {
+        for(j in 1: length(cutoff_update[[l]]))
+        {
+          if(z_update[l, i] > cutoff_update[[l]][j] && z_update[l, i] <= cutoff_update[[l]][j + 1]) # making one side inclusive
+            y[l, i] = j
+        }
+      }
     }
-    if(u > prob_MH)
-    {
-      delta_current_list[[l]] = delta_current_list[[l]]
-    }
+    #y
     
+    ## Updates of beta
     
-    
-    ## Updates of z
-    cutoff_update[[l]] = c(-Inf, 0, cumsum(exp(delta_current_list[[l]])), Inf)  ## update on nu 
-    
+    sum_t_x_sig_z = matrix(rep(0, beta_dim), nrow = beta_dim) ## initialization for each iteration is needed
     for(i in 1: n)
     {
-      for(j in 1: cat[l])
-      {
-        if(y[l, i] == j) # j = 1, 2, 3, ..., cat
-        {
-          lower_z = cutoff_update[[l]][j] 
-          upper_z = cutoff_update[[l]][j + 1] 
-          
-          cond = condMVN(mean = x[[i]] %*% beta, sigma = sig, dep=l, given = given.ind[-l], X.given = rep(1, (q-1)), check.sigma=FALSE )
-          
-          z_update[l,i] = rtruncnorm(n = 1, a = lower_z, b = upper_z, mean = cond$condMean, sd = sqrt(cond$condVar))
-          
-        }
-      } # for loop j : 1,..,cat[l]
-    } # for loop i : 1,..,n
+      sum_t_x_sig_z = sum_t_x_sig_z  + t(x[[i]]) %*% solve(sig) %*% z_update[,i] 
+    }
+    sum_t_x_sig_z 
     
-  } # end of for(l in 1: q) loop
+    beta_update_mean = beta_post_var %*% (solve(prior_beta_var) %*% prior_beta_mean  + sum_t_x_sig_z)
+    beta_update = rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_post_var )
+    
+    ## initialization for next iteration 
+    beta = as.vector(beta_update)
+    #delta = delta_current_list
+    beta_mat[k, ] = beta
+    #print(beta)
+    
+  } ## end of iteration loop
   
   
+  # beta_mat[1:500,]
+  # beta_mat[iter,]
   
-  ## Updates of beta
+  ## Naming of coefficients
   
-  # beta_update_var = solve(prior_beta_var + tcrossprod(x))
-  
-  sum_t_x_sig_z = matrix(rep(0, beta_dim), nrow = beta_dim) ## initialization
-  for(i in 1: n)
+  pnames = rep(0, beta_dim)
+  s = 0 # initialization
+  for(l in 1: length(covariate_num))
   {
-    sum_t_x_sig_z = sum_t_x_sig_z  + t(x[[i]]) %*% solve(sig) %*% z[,i] 
+    pnames[(s+1) : (s+covariate_num[l])] = c(paste("beta[",l ,",", 1:covariate_num[l], "]", sep=""))
+    s = s + covariate_num[l]
   }
-  sum_t_x_sig_z 
+  pnames
   
-  beta_update_mean = beta_update_var %*% (solve(prior_beta_var) %*% prior_beta_mean  + sum_t_x_sig_z)
-  beta_update = rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_update_var )
   
-  ## initialization for next iteration 
-  beta = as.vector(beta_update)
-  #delta = delta_current_list
-  beta_mat[k, ] = beta
-  #print(beta)
   
-} 
+  #Posterior mean 
+  Betaout = beta_mat[-c(1:burn), ]
+  colnames(Betaout) = pnames
+  postmean_beta = colMeans(Betaout)
+  #rbind(postmean_beta,beta_act) # comparison with actual given betas
+  
+  # 95% Credible indervals
+  alpha = 1- cred_level
+  interval = apply(Betaout, 2, function(x) quantile(x, c((alpha/2), 1-(alpha/2))) )
+  
+  #effective sample size
+  sample_size = ess(Betaout) 
+  
+  par_mfrow = floor(sqrt(beta_dim)) + 1  # square root for next square no of beta_dim. used in par(mfrow) to plot
+  x11()
+  #Trace plot
+  par(mfrow = c(par_mfrow,par_mfrow))
+  
+  trace = for(i in 1 : ncol(Betaout))
+  {
+    traceplot(as.mcmc(Betaout[,i]), main = pnames[i])
+  }
+  
+  x11()
+  par(mfrow = c(par_mfrow,par_mfrow))
+  #density plot
+  density = for(i in 1 : ncol(Betaout))
+  {
+    plot(density(Betaout[,i]), col = "blue", xlab = NULL, ylab = NULL, main = pnames[i])
+  }
+  
+  x11()
+  par(mfrow = c(1,1))
+  # caterplot
+  par(mfrow = c(1,1))
+  carter = for(i in 1 : ncol(Betaout))
+  {
+    caterplot(as.mcmc(Betaout), labels.loc ="axis")
+  }
+  
+  return(list(Posterior_mean = postmean_beta , Credible_interval = interval , effective_sample_size = sample_size, trace_plot = trace, density_plot = density, carter_plot = carter))
+  
+}  # end of fn ordinal_post_beta
 
-return(beta_mat)
-}## end of function ordinal_posterior_beta
 
-beta_mat[1:20,]
-beta_mat[iter,]
-
-## Naming of coefficients
-
-pnames = rep(0, beta_dim)
-s = 0 # initialization
-for(l in 1: length(covariate_num))
-{
-  pnames[(s+1) : (s+covariate_num[l])] = c(paste("beta[",l ,",", 1:covariate_num[l], "]", sep=""))
-  s = s + covariate_num[l]
-}
-pnames
-
-colnames(Betaout) = pnames
-
-## calculation of posterior mean 
-
-Betaout = beta_mat[-c(1:burn), ]
-postmean_beta = colMeans(Betaout)
-rbind(postmean_beta,beta_act) # comparison with actual given betas
-
-# plotting of trace plots
-
-par(mfrow = c(3,4))
-
-for(i in 1 : ncol(Betaout))
-{
-  traceplot(as.mcmc(Betaout[,i]))
-}
-
-#effective sample size
-ess(Betaout)  
