@@ -7,6 +7,6 @@ Author@R: person(given = "Rochita", family = "Das", role = c("aut", "cre"), emai
 Description: It implements the marginal data augmentation algorithms for posterior sampling in the Multivariate Multinomial Probit and Multivariate ordered Probit model
 License: GPL(>= 2)
 Imports: Rcpp (>= 1.0.2)
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo, MASS, tmg, mvtnorm, markovchain, coda, mcmcse, truncnorm, numDeriv, condMVNorm, matrixcalc, matrixcalc, mcmcplots
 RoxygenNote: 7.0.0
 Encoding: UTF-8
