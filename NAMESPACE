@@ -1,6 +1,5 @@
 useDynLib(BayesMVProbit, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
-
 import(MASS)
 import(tmg)
 import(mvtnorm)
@@ -8,13 +7,11 @@ import(markovchain)
 import(coda)
 import(mcmcse)
 import(truncnorm)
-
 import(numDeriv)
 import(condMVNorm)
 import(matrixcalc)
 import(graphics)
 import(mcmcplots)
-
 export(nominal_post_beta)
 export(ordinal_post_beta)
   
