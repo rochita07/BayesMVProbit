@@ -2,6 +2,23 @@
 
 
 
+#' Title
+#'
+#' @param category 
+#' @param iter 
+#' @param burn 
+#' @param cred_level 
+#' @param x_list 
+#' @param sig 
+#' @param d 
+#' @param prior_beta_mean 
+#' @param prior_beta_var 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+
 nominal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, sig, d,
                              prior_beta_mean = NULL, prior_beta_var = NULL)
 {

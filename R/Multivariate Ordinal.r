@@ -1,5 +1,24 @@
 
 
+#' Title
+#'
+#' @param category 
+#' @param df_t 
+#' @param iter 
+#' @param burn 
+#' @param cred_level 
+#' @param x_list 
+#' @param sig 
+#' @param y 
+#' @param prior_delta_mean 
+#' @param prior_delta_var 
+#' @param prior_beta_mean 
+#' @param prior_beta_var 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.95, x_list, sig, y,
                              prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
 {
