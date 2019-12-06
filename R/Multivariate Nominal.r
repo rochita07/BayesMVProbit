@@ -19,8 +19,7 @@
 #'
 #' @examples
 
-nominal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, sig, d,
-                             prior_beta_mean = NULL, prior_beta_var = NULL)
+nominal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, sig, d, prior_beta_mean = NULL, prior_beta_var = NULL)
 {
   
   n = ncol(d) # no of subjects
@@ -296,7 +295,7 @@ nominal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, si
   
   par(mfrow = c(1,1))
   
-  caterplot(as.mcmc(Betaout), labels.loc ="axis")
+ carter = caterplot(as.mcmc(Betaout), labels.loc ="axis")
   
   return(list(Posterior_mean = postmean_beta , Credible_interval = interval , trace_plot = trace, density_plot = density, carter_plot = carter))
   
