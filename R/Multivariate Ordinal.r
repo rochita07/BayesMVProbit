@@ -515,10 +515,10 @@ ordinal_post_beta = function(category, df_t = NULL, iter, burn, cred_level = 0.9
   
   par(mfrow = c(1,1))
   
-  caterplot(as.mcmc(Betaout), labels.loc ="axis")
+  carter = caterplot(as.mcmc(Betaout), labels.loc ="axis")
   
   
-  return(list(Posterior_mean = postmean_beta , Credible_interval = interval , var = beta_post_var, effective_sample_size = sample_size, trace_plot = trace, density_plot = density, carter_plot = carter))
+  return(list(Posterior_mean = postmean_beta , Credible_interval = interval , var = beta_post_var, trace_plot = trace, density_plot = density, carter_plot = carter))
   
 }  # end of function ordinal_post_beta
 
