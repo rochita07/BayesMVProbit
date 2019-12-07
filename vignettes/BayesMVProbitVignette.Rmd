@@ -14,6 +14,63 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r, cache = T, message = F}
 library(BayesMVProbit)
+```
+
+# MUltivariate Nominal 
+
+## Data structure
+
+Suppose for each subject i, $i = 1,..,n$ there are g nominal measures, the first with $p_1$  levels, the next with $p_2$ levels, and so on up to the last with $p_g$ levels.
+
+The data looks like, 
+
+$$ y_i = 
+\begin{bmatrix}
+y_{11i}\\
+y_{12i}\\
+.\\
+y_{1p_1i}\\
+.\\
+.\\
+y_{g1i}\\
+.\\
+y_{g{p_g}i}
+\end{bmatrix}
+$$
+
+We consider $y_{qji} = 1$ if i th subject has j th outcome in q th nominal measure, $y_{qji} = 0$ otherwise.
+
+We assume each of these g nominal measures follows an MNP model.
+ 
+To consider additive and multiplicative redundancy problem we assume, for the q-th measure, q = 1, ., g, there is a
+ $p_{q-1}$ dimensional utility vector $z_{qi} = (z_{q1i},.. ,z_{q{p_q}i})$
+
+$$z_{qji} = \beta_{qj}^t x_{qi} + \epsilon_{qji}$$ where $\beta_{qj}^t$ is the vector of  regression coefficient for jth level of qth nominal measure and $x_{qi}$ be covariate vector for q th level and for ith subject and $\epsilon_{qji}$ is the corresponding error term. 
+
+$$z_{qi} = B_q  x_{qi}  + \epsilon_{qi}$$  where $B_q$ is the matrix of coefficients for qth nominal measure 
+
+Alternatively, for making computation easier, we write $\beta_q$ matrix in vector form.
+
+$$z_{qi} = X_{qi} \beta_q + \epsilon_{qi}  $$ $\beta_q$ is the vectorized form of $B_q$ matrix, (row wise stacked) where and $X_{qi} = I_{p_q-1} \otimes x_{qi}^t$ is matrix of covariates.
+
+Here, $\epsilon_i \sim N(0, \Sigma)$
+
+For compact notation, Now we define, $d_i = (d_{1i}, ., d_{gi})$ denote the index vector of the alternatives the i-th subject chooses for the g measures.
+
+ $d_{qi} = j \iff y_{qji} =1 $ for j = 1, 2, .. , $p_q - $ and $d_{qi} = 0 \iff y_{qji} = p_q $
+ 
+ $d_{qi} = 0 \quad if \quad max_{1 \leq l \leq p_q -1}  \quad z_{qli} < 0 $
+
+$d_{qi} = j \quad if \quad max_{1 \leq l \leq p_q 1}  \quad z_{qli} = z_{qji} > 0 $
+
+for i = 1, .. ,n, and  q = 1, .. ,g
+
+
+
+## Data generation example
+
+```{r}
+
 ```
