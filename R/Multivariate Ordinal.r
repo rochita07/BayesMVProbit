@@ -29,7 +29,7 @@
 #'
 #' @examples
 #' 
-#' Data Generation:
+#' # Data Generation:
 #' 
 #' variable_dim = 2 # no of variables, i.e dimension of yi (can be obtained if y is given)
 #' category = c(4, 3) ## no of categories(levels) for each variable
@@ -39,21 +39,23 @@
 #' nu_cutoff1 = c(0, 2 , 2.5)  # of length nu + 1
 #' nu_cutoff2 = c(0, 4.5)
 #' beta_dim = sum(covariate_num) # dimension of beta vector
-
+#' 
 #' n = 50 # no of subjects
-
-## to generate the data
+#' 
+#' # Generation of beta
+#' 
 #' beta_act1 = rep(2, covariate_num[1])
 #' beta_act2 = rep(2,covariate_num[2])
 #' beta_act = c(beta_act1, beta_act2)
-
+#' 
 #' set.seed(1287)
 #' 
-#' Generation of x
+#' # Generation of x
+#' 
 #' x1 = matrix(rnorm(covariate_num[1]* n), nrow = covariate_num[1])  # each column is for each subject
 #' x2 = matrix(rnorm(covariate_num[2]* n), nrow = covariate_num[2])  # each column is for each subject
 #' x_list = list(x1, x2)
-
+#' 
 #' x = lapply(1:n, function(x) matrix(rep(0, variable_dim * beta_dim), nrow = variable_dim) ) ## initialization
 #' a = matrix(rep(0, variable_dim * beta_dim), nrow = variable_dim) ## to store the value in the loop
 #' col_indi = c(0, cumsum(covariate_num))  # of length variable_dim + 1
@@ -67,7 +69,8 @@
 #' }
 #' 
 #' 
-#' # generation of error 
+#' # Generation of error 
+#' 
 #' sig = diag(variable_dim) ## error covariance matrix of order variable_dim x variable_dim ( to be mentioned in the input)
 #' 
 #' e = mvtnorm::rmvnorm(n = n, mean = rep(0, variable_dim) , sigma = sig)
@@ -82,15 +85,13 @@
 #'   z[,i] =  x[[i]] %*% beta_act + e[, i]
 #' }
 #' 
-#' 
-#' ## Generation of Y 
+#' # Generation of Y 
 #' 
 #' cutoff1 = c(-Inf, nu_cutoff1, Inf)  ## To also consider the fixed cutoffs 
 #' cutoff2 = c(-Inf, nu_cutoff2, Inf)
 #' cutoff = list(cutoff1, cutoff2)
 #' 
 #' y = matrix(rep(0, variable_dim * n), nrow = variable_dim) ## initialization of matrix of order variable_dim x n # each column is for each subject
-#' 
 #' 
 #' for(i in 1:n)
 #' {
@@ -107,12 +108,12 @@
 #' y ## example of input 'y' (user should provide)
 #' 
 #' 
-#' Example 1
+#' # Example 1
 #' 
 #' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 10,  burn = 1, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
 #' 
 #' 
-#' Example 2
+#' # Example 2
 #' 
 #'  prior_delta_mean = list()  # Prior on delta
 #'  for(i in 1: variable_dim)
@@ -130,6 +131,31 @@
 #' prior_beta_var = diag(2, beta_dim)  # Prior on beta
 #' 
 #' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 10,  burn = 1, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean, prior_delta_var, prior_beta_mean, prior_beta_var)
+#' 
+#' 
+#' # Interpretation of indices of beta
+#' # Indices for a speficific beta indicate the ordinal measure and the corresponding covariate of the ordinal measure
+#' 
+#' 
+#' # Warnings: There may be warning message "Error in is.positive.definite(beta_post_var) : could not find function "is.positive.definite""
+#' 
+#' # This is beacuse of mvtnorm::rmvnorm prefers sigma to be symmetric matrix. But, covariance matrix of beta not necessarily always would be symmetric matrix.
+#' # Though this warnings does not affect sampling from mvtnorm::rmvnorm
+#' 
+#' # For example we define covariance matrix of  posterior beta from the given example as follow: 
+#' sum_t_x_sig_x = matrix(rep(0, beta_dim^2), nrow = beta_dim) ## initialization
+#' for(i in 1: n)
+#' {
+#'   sum_t_x_sig_x = sum_t_x_sig_x + t(x[[i]]) %*% sig %*% x[[i]]
+#' }
+#' sum_t_x_sig_x 
+#' 
+#' # Considering N(0,I) prior on beta we calculate covariance matrix of posterior beta as :
+#' beta_post_var = solve(solve(diag(beta_dim)) + sum_t_x_sig_x )  # variance of posterior of beta
+#' beta_post_var
+#' 
+#' # For a single sample the following code runs with out any error
+#' mvtnorm::rmvnorm(n, mean = rep(0, nrow(beta_post_var)), beta_post_var)
 #' 
 #' 
 
@@ -162,6 +188,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   {
     covariate_num[i] = dim_x_list[[i]][1]
   }
+  
   
   #check whether any element in covariate_num is zero
   if(min(covariate_num) == 0){stop("For each variable there should be atleast one covariate ")}
@@ -286,12 +313,12 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   
   #check
   
-  if(is.positive.definite(sig) == FALSE)
+  if(matrixcalc::is.positive.definite(sig) == FALSE)
   {stop("Covariance matrix of error should be symmetric positive definite matrix")
   }
   
   #check
-  check_prior_delta_var = lapply(prior_delta_var, function(x) is.positive.definite(x) )
+  check_prior_delta_var = lapply(prior_delta_var, function(x) matrixcalc::is.positive.definite(x) )
   
   for(i in 1: variable_dim)
   {
@@ -300,7 +327,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   }
   
   #check
-  if(is.positive.definite(prior_beta_var) == FALSE)
+  if(matrixcalc::is.positive.definite(prior_beta_var) == FALSE)
   {stop("Prior covariance matrix of beta should be symmetric positive definite matrix")
   }
   
@@ -566,7 +593,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
     sum_t_x_sig_z 
     
     beta_update_mean = beta_post_var %*% (solve(prior_beta_var) %*% prior_beta_mean  + sum_t_x_sig_z)
-    beta_update = rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_post_var )
+    beta_update = mvtnorm(n = 1, mean = beta_update_mean, sigma = beta_post_var )
     
     ## initialization for next iteration 
     beta = as.vector(beta_update)
@@ -633,7 +660,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   carter = caterplot(as.mcmc(Betaout), labels.loc ="axis")
   
   
-  return(list(Posterior_mean = postmean_beta , Credible_interval = interval , var = beta_post_var, trace_plot = trace, density_plot = density, carter_plot = carter))
+  return(list(Posterior_mean = postmean_beta , Credible_interval = interval, trace_plot = trace, density_plot = density, carter_plot = carter))
   
 }  # end of function ordinal_post_beta
 

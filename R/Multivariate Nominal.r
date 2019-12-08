@@ -3,8 +3,8 @@
 #' This function provides posterior mean and credible interval along with trace plots, density plots and carter plot for parameters using data augmentation algorithm (Holmes Held method) for posterior sampling in the Multivariate Multinomial Probit
 #' 
 #' @param category vector of categories for each variable
-#' @param iter  scalar, number of iteration for posterior to be calculated, default is 1500
-#' @param burn  scalar, number of burn in for posterior to be calculated, defult is 500
+#' @param iter  scalar, number of iteration for posterior to be calculated, default is 500
+#' @param burn  scalar, number of burn in for posterior to be calculated, defult is 100
 #' @param cred_level scaler, (should be in [0,1]) specifies at what level credible interval to be calculated, default value is 0.95
 #' @param x_list must be user defined as list, each level of the list represents covariates for each level. Each variable must have atleast one covariate, subject may have level specific covariates othwerwise same value of covariates to be repeated for each nominal variable 
 #' @param sig covariance matrix of error vector, must be symmetric positive definite matrix
@@ -26,7 +26,7 @@
 #'
 #' @examples
 #' 
-#' Data Generation
+#' #Data Generation
 #' 
 #' variable_dim = 2 # no of variables
 #' category = c(3,4) # no of levels for each variable
@@ -36,16 +36,16 @@
 #' beta_dim = sum((category - 1) * covariate_num)
 #' 
 #' set.seed(1287)
-#'  Generation of actual beta
+#' #Generation of actual beta
 #'  
 #' beta_act1 = matrix(rep(2, (category[1]-1) * covariate_num[1]), nrow = category[1]-1)
 #' ## matrix of regression coefficient for 1st nominal measure
-#' beta_act2 = matrix(rep(3, (category[2]-1) * covariate_num[2]), nrow = category[2]-1)
+#' beta_act2 = matrix(rep(2, (category[2]-1) * covariate_num[2]), nrow = category[2]-1)
 #' ## matrix of regression coefficient for 1st nominal measure
 #' beta_act = as.vector(c(beta_act1, beta_act2)) ## vectorized form of beta
 #' ## should be of same length  as beta_dim
 #' 
-#' Generation of X_list
+#' # Generation of X_list
 #' x1_mat = matrix(rnorm(n * covariate_num[1]), nrow = covariate_num[1] ) # each column is for each subject, each row is for each  covariates
 #' x2_mat = matrix(rnorm(n * covariate_num[2]), nrow = covariate_num[2] ) # each column is for each subject, each row is for each  covariates
 #' x_list = list(x1_mat, x2_mat)  # input should be given as list 
@@ -53,18 +53,18 @@
 #' z1_mat = beta_act1 %*% x1_mat 
 #' z2_mat = beta_act2 %*% x2_mat
 #' 
-#' Geneartion of  sig matrix
+#' # Geneartion of  sig matrix
 #' sig1 = matrix(c(1, 0.36, 0.36, 0.81), nrow = 2)
 #' sig2 = matrix(c(1, 0.45, 0.24, 0.45, 0.81, 0.41, 0.24, 0.41, 0.9), nrow =3)
 #' sig3 = matrix(c(rep(0.2, 6)), nrow =2)
 #' sig4 = matrix(c(rep(0.2, 6)), nrow =3)
 #' sig_gen = as.matrix(rbind(cbind(sig1, sig3), cbind(sig4, sig2))) ## Final sigma 
 #' 
-#' #Geneartion of error variable
+#' # Geneartion of error variable
 #' e_mat = MASS::mvrnorm(n , mu = rep(0, z_dim) , Sigma = sig_gen )  # Generation of error term
 #' e_mat = t(e_mat) # each column is for each subject
 #' 
-#' #Generation of  Z vectors for each subject, each column is for each subject
+#' # Generation of  Z vectors for each subject, each column is for each subject
 #' 
 #' z_mat = matrix(rep(0, n * z_dim), ncol = n) ## each column is for each subject
 #' 
@@ -72,7 +72,7 @@
 #'   z_mat[, i] = c(z1_mat[, i], z2_mat[, i]) + e_mat[, i]
 #' }
 #' 
-#' #Computation of d matrix ## user should provide this input
+#' # Computation of d matrix ## user should provide this input
 #' 
 #' d = matrix(rep(0, n * length(category)), ncol = n)  # each col corresponds to each subject
 #' q = rep(1, length(category) + 1)  ## the indicator to compute d matrix (as mentioned in the paper)
@@ -103,20 +103,26 @@
 #' 
 #' 
 #' 
-#' Example 1
+#' # Example 1
 #' 
-#' nominal_post_beta(category = c(3,4), iter = 1500, burn = 500, cred_level = 0.95, x_list, sig, d, prior_beta_mean = NULL, prior_beta_var = NULL)
+#' sig = sig_gen
+#' nominal_post_beta(category = c(3,4), iter = 500, burn = 100, cred_level = 0.95, x_list, sig, d, prior_beta_mean = NULL, prior_beta_var = NULL)
 #' 
 #' 
-#' Example 2
+#' # Example 2
 #' 
+#' sig = sig_gen
 #' prior_beta_mean = rep(1, beta_dim)  # Prior on beta
 #' prior_beta_var = diag(2, beta_dim)  # Prior on beta
 #' 
-#' nominal_post_beta(category = c(3,4), iter = 1500, burn = 500, cred_level = 0.95, x_list, sig, d, prior_beta_mean, prior_beta_var)
+#' nominal_post_beta(category = c(3,4), iter = 500, burn = 100, cred_level = 0.95, x_list, sig, d, prior_beta_mean, prior_beta_var)
+#' 
+#' # Interpretation of indices of beta
+#' 
+#' # Indices for a speficific beta indicate the nominal measure, level of the nominal measure and the corresponding covariate of the nominal measure
 
 
-nominal_post_beta = function(category, iter = 1500, burn =500, cred_level = 0.95, x_list, sig , d, prior_beta_mean = NULL, prior_beta_var = NULL)
+nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95, x_list, sig , d, prior_beta_mean = NULL, prior_beta_var = NULL)
 {
   
   n = ncol(d) # no of subjects
@@ -179,12 +185,12 @@ nominal_post_beta = function(category, iter = 1500, burn =500, cred_level = 0.95
   
   #check
   
-  if(is.positive.definite(sig) == FALSE)
+  if(matrixcalc::is.positive.definite(sig) == FALSE)
   {stop("Covariance matrix of error should be symmetric positive definite matrix")
   }
   
   #check
-  if(is.positive.definite(prior_beta_var) == FALSE)
+  if(matrixcalc::is.positive.definite(prior_beta_var) == FALSE)
   {stop("Prior covariance matrix of beta should be symmetric positive definite matrix")
   }
   
