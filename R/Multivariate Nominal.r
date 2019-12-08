@@ -1,4 +1,4 @@
-#' Title  Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
+#' Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
 #' 
 #' This function provides posterior mean and credible interval along with trace plots, density plots and carter plot for parameters using data augmentation algorithm (Holmes Held method) for posterior sampling in the Multivariate Multinomial Probit
 #' 
@@ -23,6 +23,8 @@
 #' \cr
 #' carter_plot        : plots of credible intervals for parameters from an MCMC simulation \cr
 #' @export
+#'
+#'
 #'
 #' @examples
 #' 

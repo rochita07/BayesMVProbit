@@ -1,4 +1,4 @@
-#' Title Data augmentation Gibbs sampling for Multivariate Ordinal Probit model
+#' Data augmentation Gibbs sampling for Multivariate Ordinal Probit model
 #'
 #' This function provides posterior mean and credible interval along with trace plots, density plots and carter plot for parameters using data augmentation algorithm (Albert Chib method) for posterior sampling in the Multivariate Ordinal Probit
 #' 
@@ -7,7 +7,7 @@
 #' @param iter scalar, number of iteration for posterior to be calculated, default is 5000
 #' @param burn scalar, number of burn in for posterior to be calculated, defult is 1000
 #' @param cred_level scaler, (should be in [0,1]) specifies at what level credible interval to be calculated, default value is 0.95
-#' @param x_list must be user defined as list, each level of the list represents covariates for each level. Each variable must have atleast one covariate, subject may have level specific covariates othwerwise same value of covariates to be repeated for each nominal variable 
+#' @param x_list must be user defined as list, each level of the list represents covariates for each level. Each variable must have atleast one covariate, subject may have level specific covariates othwerwise same value of covariates to be repeated for each ordinal variable 
 #' @param sig covariance matrix of error vector, must be symmetric positive definite matrix
 #' @param y must be user defined as matrix, each column should represent for each subject 
 #' @param prior_delta_mean must be user defined as list, each level is vector of prior mean for delta, by default it takes value 0  as prior mean for all delta at a specific level
@@ -16,7 +16,7 @@
 #' @param prior_beta_var a square positive definite matrix of prior variance for beta, default is Identity matrix of proper dimension
 #'
 #' @return
-#' Posterior_mean     : posterior mean of beta in vector form indicating the nominal measure, level of the nominal measure and the corresponding covariate of the nominal measure \cr
+#' Posterior_mean     : posterior mean of beta in vector form indicating the ordinal measure and the corresponding covariate of the ordinal measure \cr
 #' \cr
 #' Credible_interval  : credible interval for beta vector at specified level \cr
 #' \cr
@@ -26,6 +26,8 @@
 #' \cr
 #' carter_plot        : plots of credible intervals for parameters from an MCMC simulation \cr
 #' @export
+#'
+#'
 #'
 #' @examples
 #' 
