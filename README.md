@@ -223,4 +223,8 @@ Mainly students working in Bayesian field with multivariate data. Specifically, 
 
 1.	XiaoZhang, W. JohnBoscardin, Thomas R.Belin (2008), “Bayesian Analysis of Multivariate Nominal measures using Multivariate Multinomial Probit Models”, Computational Statistics & Data Analysis, Volume 52, Issue 7, 15 March 2008, Pages 3697-3708
 
+[Bayesian Analysis of Multivariate Nominal Measures Using Multivariate Multinomial Probit Models; Xiao Zhang, W. John Boscardin, and Thomas R. Belin](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2673013/)
+
 2.	Ivan Jeliazkov, Jennifer Graves, Mark Kutzbach (2008), “Fitting And Comparison of Models For Multivariate Ordinal Outcomes”, Advances in Econometrics: Bayesian Econometrics, 23
+
+[FITTING AND COMPARISON OF MODELS FOR MULTIVARIATE ORDINAL OUTCOMES; Ivan Jeliazkov, Jennifer Graves, Mark Kutzbach ](https://escholarship.org/content/qt3xz66103/qt3xz66103.pdf)
