@@ -128,13 +128,13 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
 {
   
   n = ncol(d) # no of subjects
-  variable_dim = nrow(d)
+  variable_dim = nrow(d) # dimension of nominal variables
   
   #check whether x_list is given as list
   if(is.list(x_list) == FALSE){stop("x_list should be given as list")}
   
   dim_x_list = lapply(x_list, function(x) dim(x))  # extracting #row from each xi as each col is for each subject
-  covariate_num = rep(0, variable_dim)
+  covariate_num = rep(0, variable_dim)  # to find no of covariates for each level
   
   for(i in 1: variable_dim)
   {
@@ -197,10 +197,9 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
   }
   
   
-  
   #calculation of indicator to track starting and ending point of categories of each level to  create x matrix
   
-  q = rep(1, length(category) + 1)  ## the indicator 
+  q = rep(1, length(category) + 1)  ## the indicator of starting point to run through the for loop
   q[1] = 1
   category_cum_sum = cumsum(category)
   category_cum_sum
@@ -209,15 +208,10 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
     q[g] = category_cum_sum[g-1] - (g-1 - 1)    ## ex: p1 + p2 + p3 - 2
   }
   
-  q
-  
-  
   ## For each subject,  nrow = z_dim = sum(category) - length(category), ncol = sum( (category - 1) * covariate_num)
   ## Xi s are stacked columnwise
   
-  x = matrix(rep(0, z_dim * n * beta_dim), nrow = z_dim * n, ncol = beta_dim)
-  dim(x)
-  
+  x = matrix(rep(0, z_dim * n * beta_dim), nrow = z_dim * n, ncol = beta_dim)  # initialization
   
   ##  calculation for x
   
@@ -231,39 +225,29 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
     
     ## for 2nd variable onwards
     s = s + category[1] - 1
-    #print(s)
     
     for(j in 2:length(category) )
     {
       
       x[ (s + 1) : (s + category[j] - 1) , ((category[j-1]-1) * covariate_num[j-1]) + 1 : ((category[j]-1) * covariate_num[j]) ] = kronecker(diag(category[j] - 1), t(x_list[[j]][, i]) )
       s = s + category[j] - 1
-      #print(s)
     }
   }
   
   
-  
-  
-  
-  # x[1:5,]
-  # x[1:10,]
-  # dim(x)
-  # x1_mat[,2]
-  # x2_mat[, 2]
-  
   # likelihood of Z
+  
   z_given_beta_var = kronecker(diag(n), sig)  #'Sigma' in the paper
   dim(z_given_beta_var)
   
-  ## posteriors
+  ## posterior distribution parameter
   
   z_mean = prior_beta_mean   ## marginal 
   z_var = z_given_beta_var + x %*% prior_beta_var %*% t(x)  ## variance of marginal z distn
   dim(z_var)
   precision = solve(z_var)
   
-  ## dim of f matrix
+  ## dim of f matrix (linear constraint matrix for truncation region)
   ## for each subject, there would be  z_dim x z_dim matrix of constraints in f
   row_no = col_no = z_dim * n
   
@@ -301,37 +285,26 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
       s = s + category[j] - 1
       #print(s)
     }
-    
-    
   }
-  
-  f[1:10, 1:10]
-  d[,1:2]
-  
-  #d
-  #f
-  
-  
   g = rep(0.001, row_no)
   r = rep(0, row_no)
   z = matrix(0, nrow = iter, ncol = row_no) # initialization
   dim(z)
   
   #HH posteriors of z
+  
   for(i in 2:iter)
   {
     z[i, ] = tmg::rtmg(n = 1, M = precision, f = f, g = g, r = r, initial = z[(i-1), ])
   }  
   
-  dim(z)
+  ## POsterior of beta
   
   Q = t(x) %*% solve(z_given_beta_var) %*% x  +  solve(prior_beta_var)  ## variance of marginal z|y(or d)
-  dim(Q)
-  L = chol(Q)
   
+  L = chol(Q)  # cholesky decomposition
   
-  beta = matrix(0, nrow = iter, ncol = beta_dim)
-  dim(beta)
+  beta = matrix(0, nrow = iter, ncol = beta_dim)  # initialization
   
   for(i in 1 : iter)
   {
@@ -344,6 +317,7 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
   }
   
   ## Naming of coefficients
+  
   names_category = category - 1
   pnames = rep(0, beta_dim)
   s = 0 # initialization
@@ -351,33 +325,26 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
   {
     for(j in 1: names_category[i])
     {
-      
       pnames[(s + 1) : (s +  covariate_num[i])] = c(paste("beta[",i ,",",j,",", 1:covariate_num[i], "]", sep=""))
       s = s +  covariate_num[i]
-      # print(s)
-      
     }
   }
+
   
+  # Posterior mean of beta
   
-  pnames
-  
-  
-  #Posterior mean 
   Betaout = beta[-c(1:burn), ]
   colnames(Betaout) = pnames
   postmean_beta = colMeans(Betaout)
-  #rbind(postmean_beta,beta_act) # comparison with actual given betas
   
-  # 95% Credible indervals
+  # 95% Credible indervals for beta
+  
   alpha = 1- cred_level
   interval = apply(Betaout, 2, function(x) quantile(x, c((alpha/2), 1-(alpha/2))) )
   
-  #effective sample size
-  #sample_size = ess(Betaout)
-  
   par_mfrow = floor(sqrt(beta_dim)) + 1  # square root for next square no of beta_dim. used in par(mfrow) to plot
   x11()
+  
   #Trace plot
   par(mfrow = c(par_mfrow,par_mfrow))
   
@@ -388,6 +355,7 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
   
   x11()
   par(mfrow = c(par_mfrow,par_mfrow))
+  
   #density plot
   density = for(i in 1 : ncol(Betaout))
   {
@@ -400,7 +368,7 @@ nominal_post_beta = function(category, iter = 500, burn = 100, cred_level = 0.95
   
   par(mfrow = c(1,1))
   
- carter = caterplot(as.mcmc(Betaout), labels.loc ="axis")
+  carter = caterplot(as.mcmc(Betaout), labels.loc ="axis")
   
   return(list(Posterior_mean = postmean_beta , Credible_interval = interval , trace_plot = trace, density_plot = density, carter_plot = carter))
   
