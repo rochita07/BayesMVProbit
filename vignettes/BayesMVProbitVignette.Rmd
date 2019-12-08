@@ -496,7 +496,7 @@ The function **'nominal_post_beta'** returns the following outputs:
 ### Input Variables: 
 
 ```{r, cache= TRUE, message = FALSE, warning= FALSE}
-
+library(BayesMVProbit)
 ordinal = ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 1000,  burn = 100, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
 
 ordinal$Posterior_mean

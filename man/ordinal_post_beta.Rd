@@ -20,7 +20,7 @@ ordinal_post_beta(
 )
 }
 \arguments{
-\item{category}{vector of categories for each variable}
+\item{category}{vector of categories for each variable, for any variable the no of category should be atleast 3 to consider this model}
 
 \item{df_t}{vector of degrees of freedom for proposed student's t distribution delta (as mentioned in the paper, link attached in vignette) for each variable}
 
