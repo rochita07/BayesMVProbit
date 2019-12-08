@@ -2,7 +2,8 @@
 % Please edit documentation in R/Multivariate Nominal.r
 \name{nominal_post_beta}
 \alias{nominal_post_beta}
-\title{Title}
+\title{Title  
+This function provides posterior mean and credible interval for parameters using data augmentation algorithm (Holmes Held method) for posterior sampling in the Multivariate Multinomial Probit}
 \usage{
 nominal_post_beta(
   category,
@@ -39,5 +40,6 @@ nominal_post_beta(
 
 }
 \description{
-Title
+Title  
+This function provides posterior mean and credible interval for parameters using data augmentation algorithm (Holmes Held method) for posterior sampling in the Multivariate Multinomial Probit
 }

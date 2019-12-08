@@ -1,21 +1,34 @@
 #' Title  
-#' This function provides posterior mean and credible interval for parameters using data augmentation algorithm (Holmes Held method) for posterior sampling in the Multivariate Multinomial Probit
-#' @param category 
-#' @param iter 
-#' @param burn 
-#' @param cred_level 
-#' @param x_list 
-#' @param sig 
-#' @param d 
-#' @param prior_beta_mean 
-#' @param prior_beta_var 
+#' 
+#' Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
+#' 
+#' This function provides posterior mean and credible interval along with trace plots, density plots and carter plot for parameters using data augmentation algorithm (Holmes Held method) for posterior sampling in the Multivariate Multinomial Probit
+#' 
+#' @param category vector of categories for each variable
+#' @param iter  scalar, number of iteration for posterior to be calculated, default is 1500
+#' @param burn  scalar, number of burn in for posterior to be calculated, defult is 500
+#' @param cred_level scaler, (should be in [0,1]) specifies at what level credible interval to be calculated, default value is 0.95
+#' @param x_list must be user defined as list, each level of the list represents covariates for each level. Each variable must have atleast one covariate, subject may have level specific covariates othwerwise same value of covariates to be repeated for each nominal variable 
+#' @param sig covariance matrix of error vector
+#' @param d must be user defined as matrix, each column should represent for each subject 
+#' @param prior_beta_mean vector of prior mean for beta , by default it takes value 0  as prior mean for all beta
+#' @param prior_beta_var a square positive definite matrix of prior variance for beta, default is Identity matrix of proper dimension
 #'
 #' @return
+#' Posterior_mean     : posterior mean of beta in vector form indicating the nominal measure, level of the nominal measure and the corresponding covariate of the nominal measure \cr
+#' \cr
+#' Credible_interval  : credible interval for beta vector at specified level \cr
+#' \cr
+#' trace_plot         : a plot of iterations vs. sampled values for each variable in the chain, with a separate plot per variable \cr
+#' \cr
+#' density_plot       : the distribution of variables, with a separate plot per variable \cr
+#' \cr
+#' carter_plot        : plots of credible intervals for parameters from an MCMC simulation \cr
 #' @export
 #'
 #' @examples
 
-nominal_post_beta = function(category, iter, burn, cred_level = 0.95, x_list, sig, d, prior_beta_mean = NULL, prior_beta_var = NULL)
+nominal_post_beta = function(category, iter = 1500, burn =500, cred_level = 0.95, x_list, sig , d, prior_beta_mean = NULL, prior_beta_var = NULL)
 {
   
   n = ncol(d) # no of subjects
