@@ -1,9 +1,5 @@
-## Univariate Nomianal Measure, Sigma matrix is known 
-
-
-
-#' Title
-#'
+#' Title  
+#' This function provides posterior mean and credible interval for parameters using data augmentation algorithm (Holmes Held method) for posterior sampling in the Multivariate Multinomial Probit
 #' @param category 
 #' @param iter 
 #' @param burn 
