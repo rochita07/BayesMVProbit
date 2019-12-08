@@ -1,6 +1,4 @@
-#' Title  
-#' 
-#' Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
+#' Title  Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
 #' 
 #' This function provides posterior mean and credible interval along with trace plots, density plots and carter plot for parameters using data augmentation algorithm (Holmes Held method) for posterior sampling in the Multivariate Multinomial Probit
 #' 
@@ -9,7 +7,7 @@
 #' @param burn  scalar, number of burn in for posterior to be calculated, defult is 500
 #' @param cred_level scaler, (should be in [0,1]) specifies at what level credible interval to be calculated, default value is 0.95
 #' @param x_list must be user defined as list, each level of the list represents covariates for each level. Each variable must have atleast one covariate, subject may have level specific covariates othwerwise same value of covariates to be repeated for each nominal variable 
-#' @param sig covariance matrix of error vector
+#' @param sig covariance matrix of error vector, must be symmetric positive definite matrix
 #' @param d must be user defined as matrix, each column should represent for each subject 
 #' @param prior_beta_mean vector of prior mean for beta , by default it takes value 0  as prior mean for all beta
 #' @param prior_beta_var a square positive definite matrix of prior variance for beta, default is Identity matrix of proper dimension
