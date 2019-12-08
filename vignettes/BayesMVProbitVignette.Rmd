@@ -18,7 +18,8 @@ knitr::opts_chunk$set(
 library(BayesMVProbit)
 ```
 
-# Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
+# A. Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
+
 
 ##Reference link of the paper 
 
@@ -223,7 +224,7 @@ $$
 
 case-2
 
-$d_{2i} = 1$  if  $z_{21i} > max(z_{22i},z_{23i}) $and also $z_{21i} > 0$
+$d_{2i} = 1$  if  $z_{21i} > max(z_{22i},z_{23i})$and also $z_{21i} > 0$
 
 $$f_{2i} =
 \begin{bmatrix}
@@ -295,13 +296,19 @@ The posterior mean also around 2
 
 95% credible interval is also around 2
 
+Carter plot is also provided.
+
 
 ### Conclusion
+
 Hence the model and code well represent the original data.
 
 
 
-# Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
+
+
+
+# B. Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
 
 
 ## Reference link of the paper 
@@ -506,6 +513,7 @@ The posterior mean also around 2
 
 95% credible interval is also around 2
 
+Carter plot is also provided.
 
 ### Conclusion
 Hence the model and code well represent the original data.
