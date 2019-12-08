@@ -112,7 +112,7 @@
 #' 
 #' # Example 1
 #' 
-#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 10,  burn = 1, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
+#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 5000,  burn = 1000, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
 #' 
 #' 
 #' # Example 2
@@ -132,7 +132,7 @@
 #' prior_beta_mean = rep(1, beta_dim)  # Prior on beta
 #' prior_beta_var = diag(2, beta_dim)  # Prior on beta
 #' 
-#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 10,  burn = 1, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean, prior_delta_var, prior_beta_mean, prior_beta_var)
+#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 5000,  burn = 1000, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean, prior_delta_var, prior_beta_mean, prior_beta_var)
 #' 
 #' 
 #' # Interpretation of indices of beta
