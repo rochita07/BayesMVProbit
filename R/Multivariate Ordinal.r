@@ -593,7 +593,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
     sum_t_x_sig_z 
     
     beta_update_mean = beta_post_var %*% (solve(prior_beta_var) %*% prior_beta_mean  + sum_t_x_sig_z)
-    beta_update = mvtnorm(n = 1, mean = beta_update_mean, sigma = beta_post_var )
+    beta_update = mvtnorm::rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_post_var )
     
     ## initialization for next iteration 
     beta = as.vector(beta_update)
