@@ -296,6 +296,10 @@ The posterior mean also around 2
 95% credible interval is also around 2
 
 
+### Conclusion
+Hence the model and code well represent the original data.
+
+
 
 # Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
 
@@ -501,3 +505,7 @@ The data is generated from original beta vector all beta = 2
 The posterior mean also around 2 
 
 95% credible interval is also around 2
+
+
+### Conclusion
+Hence the model and code well represent the original data.
