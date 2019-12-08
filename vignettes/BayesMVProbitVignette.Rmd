@@ -104,7 +104,7 @@ z2_mat = beta_act2 %*% x2_mat
 
 ```
 
-Sigma matrix (variance covariance matrix for error) should be defined by user, otherwise Identity matrix would be considered as by default. In this case Sigma matrix is considered as mentioned in the paper(mentioned in Readme)
+Sigma matrix (variance covariance matrix for error) should be defined by user. In this case Sigma matrix is considered as mentioned in the paper(mentioned in Readme)
 
 ```{r, cache= TRUE}
 
@@ -193,7 +193,7 @@ $Z| \beta \sim N (X \beta, \Sigma)$
 
 where Z is a vector of length $n* length(z_i) \times 1$ we get after stacking $z_i s$ from i = 1 (1) n.
 
-and X is a matrix of order $n * nrows(X_i) \times ncols(x_i) $ we get after stacking $X_i s$ from i = 1,2, .., n.
+and X is a matrix of order $n * nrows(X_i) \times ncols(x_i)$ we get after stacking $X_i s$ from i = 1,2, .., n.
 
 
 ## Posterior
@@ -305,7 +305,7 @@ Hence the model and code well represent the original data.
 
 
 
-
+### -------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 # B. Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
