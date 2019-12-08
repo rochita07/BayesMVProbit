@@ -4,8 +4,8 @@
 #' 
 #' @param category vector of categories for each variable, for any variable the no of category should be atleast 3 to consider this model
 #' @param df_t vector of degrees of freedom for proposed student's t distribution delta (as mentioned in the paper, link attached in vignette) for each variable 
-#' @param iter scalar, number of iteration for posterior to be calculated, default is 5000
-#' @param burn scalar, number of burn in for posterior to be calculated, defult is 1000
+#' @param iter scalar, number of iteration for posterior to be calculated, default is 2000
+#' @param burn scalar, number of burn in for posterior to be calculated, defult is 500
 #' @param cred_level scaler, (should be in [0,1]) specifies at what level credible interval to be calculated, default value is 0.95
 #' @param x_list must be user defined as list, each level of the list represents covariates for each level. Each variable must have atleast one covariate, subject may have level specific covariates othwerwise same value of covariates to be repeated for each ordinal variable 
 #' @param sig covariance matrix of error vector, must be symmetric positive definite matrix
@@ -112,7 +112,7 @@
 #' 
 #' # Example 1
 #' 
-#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 5000,  burn = 1000, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
+#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 2000,  burn = 500, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
 #' 
 #' 
 #' # Example 2
@@ -132,7 +132,7 @@
 #' prior_beta_mean = rep(1, beta_dim)  # Prior on beta
 #' prior_beta_var = diag(2, beta_dim)  # Prior on beta
 #' 
-#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 5000,  burn = 1000, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean, prior_delta_var, prior_beta_mean, prior_beta_var)
+#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 2000,  burn = 500, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean, prior_delta_var, prior_beta_mean, prior_beta_var)
 #' 
 #' 
 #' # Interpretation of indices of beta
