@@ -2,7 +2,7 @@
 #'
 #' This function provides posterior mean and credible interval along with trace plots, density plots and carter plot for parameters using data augmentation algorithm (Albert Chib method) for posterior sampling in the Multivariate Ordinal Probit
 #' 
-#' @param category vector of categories for each variable
+#' @param category vector of categories for each variable, for any variable the no of category should be atleast 3 to consider this model
 #' @param df_t vector of degrees of freedom for proposed student's t distribution delta (as mentioned in the paper, link attached in vignette) for each variable 
 #' @param iter scalar, number of iteration for posterior to be calculated, default is 5000
 #' @param burn scalar, number of burn in for posterior to be calculated, defult is 1000
@@ -170,6 +170,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   variable_dim = nrow(y) # no of variables
   
   # Check  for numbers of categories for each variable should be  >= 3
+  
   check_category = category - rep(3, variable_dim ) ## should be >=0
   check_category = ifelse(check_category < 0 , 1, 0)  # should be all zeros
   if(identical(check_category, rep(0, variable_dim)) == FALSE)
@@ -184,7 +185,8 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   if(is.list(x_list) == FALSE){stop("x_list should be given as list")}
   
   dim_x_list = lapply(x_list, function(x) dim(x))  # extracting #row from each xi as each col is for each subject
-  covariate_num = rep(0, variable_dim)
+  
+  covariate_num = rep(0, variable_dim)  # to find number of covariates in each ordinal level
   
   for(i in 1: variable_dim)
   {
@@ -195,7 +197,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   #check whether any element in covariate_num is zero
   if(min(covariate_num) == 0){stop("For each variable there should be atleast one covariate ")}
   
-  beta_dim = sum(covariate_num)
+  beta_dim = sum(covariate_num)  # dimension of beta vector
   
   #check  # check for compatibility of dimension of x_list with n
   check_n = array(variable_dim)
@@ -213,7 +215,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   
   x = lapply(1:n, function(x) matrix(rep(0, variable_dim * beta_dim), nrow = variable_dim) ) ## initialization
   a = matrix(rep(0, variable_dim * beta_dim), nrow = variable_dim) ## to store the value in the loop
-  col_indi = c(0, cumsum(covariate_num))  # of length variable_dim + 1
+  col_indi = c(0, cumsum(covariate_num))  # consider the starting point to run in the loop which is of length variable_dim + 1
   for(i in 1:n)
   {
     for(l in 1: variable_dim)
@@ -225,7 +227,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   
   
   #check 
-  if(is.null(df_t) == TRUE)  # if not supplied
+  if(is.null(df_t) == TRUE)  # if not supplied default value is considered as 5 for all levels
   {
     df_t = rep(5 , variable_dim) 
   }
@@ -238,16 +240,6 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   
   #check
   if(cred_level<0 || cred_level>1){stop("credible interval level should be in [0,1]")}
-  
-  
-  # #check
-  # if(dim(y)[1] != variable_dim)
-  # {stop("# row of y matrix should be equal to given variable_dim")
-  #   }
-  # 
-  # if(dim(y)[2] != n)
-  # {stop("# col of y matrix should be equal to given n" )
-  #   }
   
   
   #check
@@ -334,9 +326,6 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   }
   
   
-  
-  
-  
   ## initializations required for the iteration loop
   
   beta = rmvnorm(n = 1, mean = prior_beta_mean , sigma = prior_beta_var) # as 1st sample of beta
@@ -363,7 +352,6 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   
   # Calculation of variance of posterior of beta
   
-  #t_x_sig_x = lapply(x, function(x) t(x) %*% solve(sig) %*% x)
   sum_t_x_sig_x = matrix(rep(0, beta_dim^2), nrow = beta_dim) ## initialization
   for(i in 1: n)
   {
@@ -380,9 +368,6 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   
   delta_hat_proposed_t = list(0) #initialization to store ncp parameter of proposed t density
   scale_proposed_t = list(0)  #initialization to store scale matrix of proposed t density
-  
-  
-  
   
   
   for (k in 1: iter) # for iteration
@@ -512,12 +497,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
       
     } # end of loop for l in 1: variable_dim
     
-    delta_hat_proposed_t
-    scale_proposed_t
-    
-    
-    
-    
+   
     ## updates of delta
     
     for(l in 1: variable_dim)
@@ -583,7 +563,6 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
         }
       }
     }
-    #y
     
     ## Updates of beta
     
@@ -598,16 +577,12 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
     beta_update = mvtnorm::rmvnorm(n = 1, mean = beta_update_mean, sigma = beta_post_var )
     
     ## initialization for next iteration 
+    
     beta = as.vector(beta_update)
-    #delta = delta_current_list
     beta_mat[k, ] = beta
-    #print(beta)
     
   } ## end of iteration loop
-  
-  
-  # beta_mat[1:500,]
-  # beta_mat[iter,]
+ 
   
   ## Naming of coefficients
   
@@ -618,25 +593,22 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
     pnames[(s+1) : (s+covariate_num[l])] = c(paste("beta[",l ,",", 1:covariate_num[l], "]", sep=""))
     s = s + covariate_num[l]
   }
-  pnames
   
+  #Posterior mean of beta
   
-  
-  #Posterior mean 
   Betaout = beta_mat[-c(1:burn), ]
   colnames(Betaout) = pnames
   postmean_beta = colMeans(Betaout)
-  #rbind(postmean_beta,beta_act) # comparison with actual given betas
+
   
-  # 95% Credible indervals
+  # 95% Credible indervals for beta
+  
   alpha = 1- cred_level
   interval = apply(Betaout, 2, function(x) quantile(x, c((alpha/2), 1-(alpha/2))) )
   
-  #effective sample size
-  #sample_size = ess(Betaout)
-  
   par_mfrow = floor(sqrt(beta_dim)) + 1  # square root for next square no of beta_dim. used in par(mfrow) to plot
   x11()
+  
   #Trace plot
   par(mfrow = c(par_mfrow,par_mfrow))
   
@@ -647,6 +619,7 @@ ordinal_post_beta = function(category, df_t = NULL, iter = 5000, burn = 1000, cr
   
   x11()
   par(mfrow = c(par_mfrow,par_mfrow))
+  
   #density plot
   density = for(i in 1 : ncol(Betaout))
   {
