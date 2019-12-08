@@ -13,7 +13,7 @@ This package will implement the marginal data augmentation algorithms for poster
 
 ## Multivariate Multinomial Probit model: 
 
-Let there are g nominal measures. For say qth measure we have $q_p$ categories and we consider $q_p -1$ latent variables. The method consider to regress this latent variables and consider the maximum latent variable and consider the corresponding y value to be 1 or 0 otherwise. Here the latent variable follows multivariate normal with appropriate dimension. Hence the model is called probit. 
+Let there are g nominal measures. For say qth measure we have q_p categories and we consider q_p -1 latent variables. The method consider to regress this latent variables and consider the maximum latent variable and consider the corresponding y value to be 1 or 0 otherwise. Here the latent variable follows multivariate normal with appropriate dimension. Hence the model is called probit. 
 
 The method of generating data is as follow: 
 
@@ -95,11 +95,13 @@ for(i in 1: n)
   }
 }
 
-
-
-
+d #Example of d matrix
 ```
 
+For better mixing, we consider Holmes Held approach, where we sample latent variable after marginalizing beta and we sample beta from its posterior distribution.
+
+
+## Multivariate Multinomial Probit model: 
 
 # Intended users: 
 
