@@ -30,7 +30,7 @@ ordinal_post_beta(
 
 \item{cred_level}{scaler, (should be in [0,1]) specifies at what level credible interval to be calculated, default value is 0.95}
 
-\item{x_list}{must be user defined as list, each level of the list represents covariates for each level. Each variable must have atleast one covariate, subject may have level specific covariates othwerwise same value of covariates to be repeated for each nominal variable}
+\item{x_list}{must be user defined as list, each level of the list represents covariates for each level. Each variable must have atleast one covariate, subject may have level specific covariates othwerwise same value of covariates to be repeated for each ordinal variable}
 
 \item{sig}{covariance matrix of error vector, must be symmetric positive definite matrix}
 
@@ -45,7 +45,7 @@ ordinal_post_beta(
 \item{prior_beta_var}{a square positive definite matrix of prior variance for beta, default is Identity matrix of proper dimension}
 }
 \value{
-Posterior_mean     : posterior mean of beta in vector form indicating the nominal measure, level of the nominal measure and the corresponding covariate of the nominal measure \cr
+Posterior_mean     : posterior mean of beta in vector form indicating the ordinal measure and the corresponding covariate of the ordinal measure \cr
 \cr
 Credible_interval  : credible interval for beta vector at specified level \cr
 \cr
