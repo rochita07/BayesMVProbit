@@ -89,7 +89,7 @@ set.seed(1287)
 
 beta_act1 = matrix(rep(2, (category[1]-1) * covariate_num[1]), nrow = category[1]-1)
   ## matrix of regression coefficient for 1st nominal measure
-beta_act2 = matrix(rep(3, (category[2]-1) * covariate_num[2]), nrow = category[2]-1)
+beta_act2 = matrix(rep(2, (category[2]-1) * covariate_num[2]), nrow = category[2]-1)
  ## matrix of regression coefficient for 1st nominal measure
 beta_act = as.vector(c(beta_act1, beta_act2)) ## vectorized form of beta
 ## should be of same length  as beta_dim
@@ -261,7 +261,7 @@ $$
 
 The function **'nominal_post_beta'** returns the following outputs: 
 
-1. Posterior_mean: It gives posterior mean of beta in vector form indicating the nominal measure, level of the nominal measure and the corresponding covariate of the nominal measure
+1. Posterior_mean: It gives posterior mean of beta in vector form indicating the ordinal measure and the corresponding covariate of the ordinal measure
 
 2. Credible_interval: It gives credible interval for beta vector at specified level (user input otherwise bydefault at 95%)
 
@@ -277,7 +277,12 @@ The function **'nominal_post_beta'** returns the following outputs:
 
 ### Input Variables: 
 
+```{r, cache =TRUE}
+sig = sig_gen
 
+nominal_post_beta(category = c(3,4), iter = 200, burn = 100, cred_level = 0.95, x_list, sig, d, prior_beta_mean = NULL, prior_beta_var = NULL)
+
+```
 
 ### Output Variables
 
@@ -289,7 +294,7 @@ The function **'nominal_post_beta'** returns the following outputs:
 # Data augmentation Gibbs sampling for Multivariate Multinomial Probit model
 
 
-##Reference link of the paper 
+## Reference link of the paper 
 
 
 [FITTING AND COMPARISON OF MODELS FOR MULTIVARIATE ORDINAL OUTCOMES; Ivan Jeliazkov, Jennifer Graves, Mark Kutzbach ](https://escholarship.org/content/qt3xz66103/qt3xz66103.pdf)
@@ -473,6 +478,12 @@ The function **'nominal_post_beta'** returns the following outputs:
 
 ### Input Variables: 
 
+```{r, cache= TRUE, message = FALSE, warning= FALSE}
+
+ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 100,  burn = 10, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
+
+
+```
 
 
 ### Output Variables
