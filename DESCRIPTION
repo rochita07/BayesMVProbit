@@ -3,7 +3,8 @@ Type: Package
 Title: Data augmentation Gibbs sampling for Multivariate Multinomial Probit model and Multivariate ordered Probit model
 Version: 1.0
 Date: 2019-11-20
-Author@R: person(given = "Rochita", family = "Das", role = c("aut", "cre"), email = "rochita.das.stat@gmail.com")
+Author: Rochita Das
+Maintainer: Rochita Das <rochita.das.stat@gmail.com>
 Description: It implements the marginal data augmentation algorithms for posterior sampling in the Multivariate Multinomial Probit and Multivariate ordered Probit model
 License: GPL(>= 2)
 Imports: Rcpp (>= 1.0.2), MASS, tmg, mvtnorm, markovchain, coda, mcmcse, truncnorm, numDeriv, condMVNorm, matrixcalc, graphics, mcmcplots
