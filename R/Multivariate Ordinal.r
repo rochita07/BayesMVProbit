@@ -16,7 +16,7 @@
 #' @param prior_beta_var a square positive definite matrix of prior variance for beta, default is Identity matrix of proper dimension
 #'
 #' @return
-#' #' Posterior_mean     : posterior mean of beta in vector form indicating the nominal measure, level of the nominal measure and the corresponding covariate of the nominal measure \cr
+#' Posterior_mean     : posterior mean of beta in vector form indicating the nominal measure, level of the nominal measure and the corresponding covariate of the nominal measure \cr
 #' \cr
 #' Credible_interval  : credible interval for beta vector at specified level \cr
 #' \cr
@@ -28,6 +28,108 @@
 #' @export
 #'
 #' @examples
+#' 
+#' Data Generation:
+#' 
+#' variable_dim = 2 # no of variables, i.e dimension of yi (can be obtained if y is given)
+#' category = c(4, 3) ## no of categories(levels) for each variable
+#' covariate_num = c(2, 3) # No of covariates for each level
+#' nu_tot = category + 1 ## no of cut points 
+#' nu = nu_tot - 3 ## no of cutpoints to be considered for each variable ( nu0, nu1, nuJ are fixed)
+#' nu_cutoff1 = c(0, 2 , 2.5)  # of length nu + 1
+#' nu_cutoff2 = c(0, 4.5)
+#' beta_dim = sum(covariate_num) # dimension of beta vector
+
+#' n = 50 # no of subjects
+
+## to generate the data
+#' beta_act1 = rep(2, covariate_num[1])
+#' beta_act2 = rep(2,covariate_num[2])
+#' beta_act = c(beta_act1, beta_act2)
+
+#' set.seed(1287)
+#' 
+#' Generation of x
+#' x1 = matrix(rnorm(covariate_num[1]* n), nrow = covariate_num[1])  # each column is for each subject
+#' x2 = matrix(rnorm(covariate_num[2]* n), nrow = covariate_num[2])  # each column is for each subject
+#' x_list = list(x1, x2)
+
+#' x = lapply(1:n, function(x) matrix(rep(0, variable_dim * beta_dim), nrow = variable_dim) ) ## initialization
+#' a = matrix(rep(0, variable_dim * beta_dim), nrow = variable_dim) ## to store the value in the loop
+#' col_indi = c(0, cumsum(covariate_num))  # of length variable_dim + 1
+#' for(i in 1:n)
+#' {
+#'   for(l in 1: variable_dim)
+#'   {
+#'     a[l, (col_indi[l] + 1) : col_indi[l + 1]] = t(x_list[[l]][,i])
+#'   }
+#'   x[[i]] = a
+#' }
+#' 
+#' 
+#' # generation of error 
+#' sig = diag(variable_dim) ## error covariance matrix of order variable_dim x variable_dim ( to be mentioned in the input)
+#' 
+#' e = mvtnorm::rmvnorm(n = n, mean = rep(0, variable_dim) , sigma = sig)
+#' e = t(e) # # each column is for each subject
+#' 
+#' 
+#' # Generation of  Z
+#' 
+#' z = matrix(rep(0, variable_dim * n), nrow = variable_dim)  # matrix of order variable_dim x n # # each column is for each subject
+#' for(i in 1:n)
+#' {
+#'   z[,i] =  x[[i]] %*% beta_act + e[, i]
+#' }
+#' 
+#' 
+#' ## Generation of Y 
+#' 
+#' cutoff1 = c(-Inf, nu_cutoff1, Inf)  ## To also consider the fixed cutoffs 
+#' cutoff2 = c(-Inf, nu_cutoff2, Inf)
+#' cutoff = list(cutoff1, cutoff2)
+#' 
+#' y = matrix(rep(0, variable_dim * n), nrow = variable_dim) ## initialization of matrix of order variable_dim x n # each column is for each subject
+#' 
+#' 
+#' for(i in 1:n)
+#' {
+#'   for(l in 1:variable_dim)
+#'   {
+#'     for(j in 1: length(cutoff[[l]]))
+#'     {
+#'       if(z[l, i] > cutoff[[l]][j] && z[l, i] <= cutoff[[l]][j + 1]) # making one side inclusive
+#'         y[l, i] = j
+#'     }
+#'   }
+#' }
+#' 
+#' y ## example of input 'y' (user should provide)
+#' 
+#' 
+#' Example 1
+#' 
+#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 10,  burn = 1, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
+#' 
+#' 
+#' Example 2
+#' 
+#'  prior_delta_mean = list()  # Prior on delta
+#'  for(i in 1: variable_dim)
+#'  {
+#'    prior_delta_mean[[i]] = rep(0, nu[i])
+#'  }
+#'  
+#'  prior_delta_var = list()   # Prior on delta
+#'  for(i in 1: variable_dim)
+#'    {
+#'      prior_delta_var[[i]] = diag(nu[i])
+#'    }
+#' 
+#' prior_beta_mean = rep(1, beta_dim)  # Prior on beta
+#' prior_beta_var = diag(2, beta_dim)  # Prior on beta
+#' 
+#' ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 10,  burn = 1, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean, prior_delta_var, prior_beta_mean, prior_beta_var)
 #' 
 #' 
 
