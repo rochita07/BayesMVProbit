@@ -280,14 +280,20 @@ The function **'nominal_post_beta'** returns the following outputs:
 ```{r, cache =TRUE}
 sig = sig_gen
 
-nominal_post_beta(category = c(3,4), iter = 200, burn = 100, cred_level = 0.95, x_list, sig, d, prior_beta_mean = NULL, prior_beta_var = NULL)
+nominal = nominal_post_beta(category = c(3,4), iter = 300, burn = 100, cred_level = 0.95, x_list, sig, d, prior_beta_mean = NULL, prior_beta_var = NULL)
 
+nominal$Posterior_mean
+nominal$Credible_interval
 ```
 
 ### Output Variables
 
 
+The data is generated from original beta vector all beta = 2
 
+The posterior mean also around 2 
+
+95% credible interval is also around 2
 
 
 
@@ -346,7 +352,7 @@ To consider the identification contraints $\gamma_{k0} = -\infty, \gamma_{k1} = 
 
 Albert Chib(2001) simplified the sampling of cutpoints $\gamma$ by a one-to-one transpormation as follow: 
 
-$\delta_{kj} = ln(\gamma_{kj} - \gamma_{(kj)-1}$ for $2 \leq kj \leq J_k - 1$
+$ \delta_{kj} = ln(\gamma_{kj} - \gamma_{(kj)-1}$ for $2 \leq kj \leq J_k - 1$
 
 
 ## Data generation example [Binary data : 2 ordinal measures, respectively have $p_1 = 4$ and $p_2 = 3$ levels]
@@ -456,7 +462,7 @@ Likelihood : $z_i \sim N(X_i \beta, \Sigma)$
 
 2. Sample $z_k|y,\beta,\delta_k, z_{k^c}$  by drawing $z_{ik}|y\beta, \gamma,z_{k^c} \sim TN_{(\gamma_{j-1}, \gamma_j)}(\mu_{k.}, \sigma_{k.}^2)$ for i = 1,..,n where $\mu_{k.}, \sigma_{k.}^2$ are conditional mean and variance for a Gaussian Distribution.
 
-3. Sample $\beta|z \sim N(\hat{\beta}, \hat{B})$ where $\hat{B} = (B_0^{-1} + \sum_{i = 1} ^{n} X_i^t \Sigma^{-1} X_i)^{-1}$  and $\hat{\beta} =\hat{B}(B_0^{-1} \beta_0 + \sum_{i = 1} ^{n} X_i^t \Sigma^{-1} z_i ) $
+3. Sample $\beta|z \sim N(\hat{\beta}, \hat{B})$ where $\hat{B} = (B_0^{-1} + \sum_{i = 1} ^{n} X_i^t \Sigma^{-1} X_i)^{-1}$  and $\hat{\beta} =\hat{B}(B_0^{-1} \beta_0 + \sum_{i = 1} ^{n} X_i^t \Sigma^{-1} z_i )$
 
 
 ## Interpretation of the results:
@@ -480,10 +486,18 @@ The function **'nominal_post_beta'** returns the following outputs:
 
 ```{r, cache= TRUE, message = FALSE, warning= FALSE}
 
-ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 100,  burn = 10, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
+ordinal = ordinal_post_beta(category = c(4, 3), df_t = NULL, iter = 1000,  burn = 100, cred_level = 0.95, x_list, sig = diag(2), y , prior_delta_mean = NULL, prior_delta_var = NULL, prior_beta_mean = NULL, prior_beta_var = NULL)
 
-
+ordinal$Posterior_mean
+ordinal$Credible_interval
+  
 ```
 
 
 ### Output Variables
+
+The data is generated from original beta vector all beta = 2
+
+The posterior mean also around 2 
+
+95% credible interval is also around 2
